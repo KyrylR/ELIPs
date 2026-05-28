@@ -34,7 +34,7 @@ This document is licensed under the 3-clause BSD license.
 
 Bitcoin integrations can use public addresses and PSBTs as their main wallet-facing primitives.
 Liquid wallets require a more explicit profile because Liquid has confidential transactions, multiple issued assets,
-network-specific policy assets, CT descriptors, blinding material, and PSETs.
+network-specific policy assets, CT descriptors, blinding keys, and PSETs.
 
 Dapps need enough public wallet information to identify the connected account, construct descriptor-aware receive
 and change logic, read user-approved balances and UTXOs, and build valid PSET signing requests. At the same time,
@@ -57,7 +57,7 @@ The following terms are used throughout this ELIP.
 |-
 | <code>chain_id</code> || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain identifier: <code>"bip122:" + first_32_lowercase_hex_characters_of_genesis_block_hash</code>.
 |-
-| Public wallet descriptor || An ordinary Liquid/Elements output descriptor with public spend-key material and no <code>ct(...)</code> wrapper. It can derive scriptPubKeys and unconfidential addresses. It cannot derive confidential addresses, unblind outputs, or spend funds.
+| Public wallet descriptor || An ordinary Liquid/Elements output descriptor with public spend-key and no <code>ct(...)</code> wrapper. It can derive scriptPubKeys and unconfidential addresses. It cannot derive confidential addresses, unblind outputs, or spend funds.
 |-
 | Account identifier || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] Liquid account ID for the connected wallet account: <code>chain_id + ":" + dwid</code>. This value is used in <code>accountIdentifier</code> result fields and in <code>account</code> request parameters.
 |-
@@ -65,11 +65,11 @@ The following terms are used throughout this ELIP.
 |-
 | Connected account || The account identifier authorized for the active transport session.
 |-
-| Public confidential descriptor || An [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] CT descriptor with public blinding-key material only. It can derive confidential addresses. It cannot derive private blinding keys and cannot unblind outputs.
+| Public confidential descriptor || An [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] CT descriptor with public blinding-key only. It can derive confidential addresses. It cannot derive private blinding keys and cannot unblind outputs.
 |-
-| View descriptor || A CT descriptor that lets the holder derive private blinding keys or otherwise unblind wallet outputs. Examples include descriptors using [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private master blinding material, private descriptor blinding keys, descriptor blinding xprvs, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] <code>ct(elip151, <DESCRIPTOR>)</code>. View descriptors MUST NOT be returned by this profile.
+| View descriptor || A CT descriptor that lets the holder derive private blinding keys or otherwise unblind wallet outputs. Examples include descriptors using [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private master blinding key, private descriptor blinding keys, descriptor blinding xprvs, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] <code>ct(elip151, <DESCRIPTOR>)</code>. View descriptors MUST NOT be returned by this profile.
 |-
-| Wallet blinding policy || The wallet rule that determines how confidential addresses and output blinding keys are derived for a script tree, for example [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077], public [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] blinding-key material, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151].
+| Wallet blinding policy || The wallet rule that determines how confidential addresses and output blinding keys are derived for a script tree, for example [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077], public [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] blinding-key, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151].
 |-
 | Derived view material || Any descriptor, key, or deterministic derivation result that lets the holder derive private blinding keys or unblind wallet outputs.
 |-
@@ -118,7 +118,7 @@ Liquid testnet uses <code>bip122:a771da8e52ee6ad581ed1e9a99825e5b</code>.
 Custom Elements chains MUST use the [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] <code>bip122</code>
 chain identifier derived from their own genesis block hash.
 
-Example account material:
+Example account identifier values:
 
 <pre>
 public_wallet_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*)#csxkmyvv
@@ -264,7 +264,7 @@ Example result:
 
 ====<code>getWalletDescriptor</code>====
 
-This method returns public descriptor material for the connected Liquid account.
+This method returns public descriptor for the connected Liquid account.
 The caller selects the disclosure type with <code>descriptorType</code> and MAY provide an ordered <code>accept</code>
 list of descriptor format profiles that it can parse.
 
@@ -1055,7 +1055,7 @@ This profile specifies the event name and <code>event.data</code> shape; transpo
 * Wallets MUST treat <code>getWalletDescriptor</code> as descriptor disclosure and MUST only answer after descriptor disclosure is authorized by the active session or approved for the individual request. Wallets MUST display descriptor type, selected descriptor format, and disclosure consequences before per-request approval.
 * Wallets MUST treat [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077], private-key, xprv, and [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] CT descriptors as view-capable material that is not exported by this profile.
 * Wallets MUST NOT return view-capable CT descriptors, private spend keys, spend descriptors, master blinding keys, descriptor blinding private keys, descriptor blinding xprvs, per-address private blinding keys, asset blinding factors, value blinding factors, or shared nonces through this profile. The only CT descriptor that may be returned is <code>publicConfidentialDescriptor</code> with public blinding-key material.
-* Wallets MUST NOT log view-capable descriptor material, private blinding material, identity shared keys, intermediate PSETs containing secrets, or Wallet ABI payloads containing unblinding data.
+* Wallets MUST NOT log view-capable descriptor material, private blinding keys, identity shared keys, intermediate PSETs containing secrets, or Wallet ABI payloads containing unblinding data.
 * Wallets that support <code>processConfidentialTransaction</code> MUST enforce the Wallet ABI version, account scope, transaction approval, result shape, and artifact redaction rules from the referenced Wallet ABI protocol.
 * Wallets MUST treat <code>getBalance</code> and <code>getUTXOs</code> as account-state disclosure methods and MUST only answer them for accounts authorized in the active session and after the relevant session permission or per-request approval. The permission or approval MUST define the account, method, asset scope, and active-session lifetime.
 * Wallets MUST treat <code>signPset</code> as transaction approval, display sighash scope and wallet-computed net asset movement, and MUST redact wallet-derived blinding secrets from the PSET response or reject the request.
@@ -1092,10 +1092,10 @@ A public wallet descriptor is useful for derivation and verification, but it is 
 
 ===Public confidential descriptors===
 
-The profile permits public confidential descriptors only when the blinding material is public and not recoverable
+The profile permits public confidential descriptors only when the blinding keys is public and not recoverable
 as private view material from data disclosed to the dapp.
 It does not return [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] descriptors,
-[https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private material, descriptor blinding
+[https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private keys, descriptor blinding
 private keys, or descriptor blinding xprvs, because those forms let the holder unblind wallet outputs.
 
 ===No caller-provided change address===
