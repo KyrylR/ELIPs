@@ -59,13 +59,15 @@ The following terms are used throughout this ELIP.
 |-
 | Public wallet descriptor || An ordinary Liquid/Elements output descriptor with public spend-key material and no <code>ct(...)</code> wrapper. It can derive scriptPubKeys and unconfidential addresses. It cannot derive confidential addresses, unblind outputs, or spend funds.
 |-
-| Account identifier || The profile-specific account suffix selected by this ELIP: the first external unconfidential address at index <code>0</code> derived from the public wallet descriptor.
+| Account identifier || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] Liquid account ID for the connected wallet account: <code>chain_id + ":" + dwid</code>. This value is used in <code>accountIdentifier</code> result fields and in <code>account</code> request parameters.
 |-
-| Connected account || The account string displayed and persisted by the dapp: <code>chain_id + ":" + account_identifier</code>.
+| DWID || The Deterministic Wallet IDentifier defined by [https://github.com/ElementsProject/ELIPs/blob/main/elip-0152.mediawiki ELIP-0152]. In this profile, the DWID component of an account identifier MUST identify the same wallet descriptor set as the public wallet descriptor returned for the connected account.
+|-
+| Connected account || The account identifier authorized for the active transport session.
 |-
 | Public confidential descriptor || An [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] CT descriptor with public blinding-key material only. It can derive confidential addresses. It cannot derive private blinding keys and cannot unblind outputs.
 |-
-| View descriptor || A CT descriptor that lets the holder derive private blinding keys or otherwise unblind wallet outputs. Examples include descriptors using [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private master blinding material, private descriptor blinding keys, descriptor blinding xprvs, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] <code>ct(elip151, &lt;DESCRIPTOR&gt;)</code>. View descriptors MUST NOT be returned by this profile.
+| View descriptor || A CT descriptor that lets the holder derive private blinding keys or otherwise unblind wallet outputs. Examples include descriptors using [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private master blinding material, private descriptor blinding keys, descriptor blinding xprvs, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] <code>ct(elip151, <DESCRIPTOR>)</code>. View descriptors MUST NOT be returned by this profile.
 |-
 | Wallet blinding policy || The wallet rule that determines how confidential addresses and output blinding keys are derived for a script tree, for example [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077], public [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] blinding-key material, or [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151].
 |-
@@ -73,7 +75,7 @@ The following terms are used throughout this ELIP.
 |-
 | Descriptor format profile || A named descriptor representation that a dapp can request and parse.
 |-
-| Multipath descriptor || A descriptor using [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] syntax, such as <code>&lt;0;1&gt;/*</code>, to represent multiple derivation branches in one descriptor.
+| Multipath descriptor || A descriptor using [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] syntax, such as <code><0;1>/*</code>, to represent multiple derivation branches in one descriptor.
 |-
 | Split branch descriptors || Separate descriptors for the external branch and internal/change branch, without [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] multipath syntax.
 |-
@@ -96,18 +98,19 @@ context is insufficient to choose one, the wallet MUST reject the request or req
 
 ===Account identifier===
 
-A Liquid wallet account in this profile is encoded as follows:
+A Liquid wallet account identifier in this profile is the [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID:
 
 <pre>
-account            = chain_id + ":" + account_identifier
+account_identifier = chain_id + ":" + dwid
 chain_id           = "bip122:" + first_32_lowercase_hex_characters_of_genesis_block_hash
-account_identifier = first external unconfidential address at index 0 derived from the public wallet descriptor
+dwid               = Deterministic Wallet IDentifier as defined by ELIP-0152
 </pre>
 
+The <code>account</code> request parameter, where present, MUST contain this full <code>account_identifier</code> value.
 Wallets and dapps MUST follow these rules:
 
 # Dapps MUST display and persist this account identifier as the connected account.
-# Wallets MUST only offer identifiers that belong to the active Liquid or Elements chain.
+# Wallets MUST only offer account identifiers that belong to the active Liquid or Elements chain.
 # Dapps MUST NOT treat this identifier as a receive address, a balance handle, or a sufficient description of the wallet's UTXO set.
 
 The <code>chain_id</code> prefix identifies the network. Liquid mainnet uses <code>bip122:1466275836220db2944ca059a3a10ef6</code>.
@@ -118,9 +121,9 @@ chain identifier derived from their own genesis block hash.
 Example account material:
 
 <pre>
-public_wallet_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/&lt;0;1&gt;/*)#csxkmyvv
-account_identifier       = ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a
-account                  = bip122:1466275836220db2944ca059a3a10ef6:ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a
+public_wallet_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*)#csxkmyvv
+dwid                     = b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
+account_identifier       = bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
 </pre>
 
 ===Derivation paths and descriptors===
@@ -145,13 +148,13 @@ the concrete address or script.
 
 Descriptors returned by this profile MUST use the output descriptor syntax defined by [https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki BIP-380].
 Multipath descriptors MAY use [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] syntax such
-as <code>&lt;0;1&gt;/*</code>. Elements script expressions such as <code>elwpkh(...)</code>, <code>elsh(...)</code>, <code>elwsh(...)</code>,
+as <code><0;1>/*</code>. Elements script expressions such as <code>elwpkh(...)</code>, <code>elsh(...)</code>, <code>elwsh(...)</code>,
 and <code>eltr(...)</code> MAY be used where supported by the wallet.
 
 A wallet MUST NOT return a public wallet descriptor if the wallet blinding policy makes the ordinary descriptor
 sufficient to reconstruct derived view material. For example, a wallet using
 [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] MUST treat the ordinary descriptor
-as view-capable because <code>ct(elip151, &lt;DESCRIPTOR&gt;)</code> deterministically derives its view key from <code>&lt;DESCRIPTOR&gt;</code>.
+as view-capable because <code>ct(elip151, <DESCRIPTOR>)</code> deterministically derives its view key from <code><DESCRIPTOR></code>.
 
 ===Asset identifiers===
 
@@ -179,11 +182,11 @@ The recognized descriptor format profiles are:
 {| class="wikitable"
 ! Format profile !! Descriptor type !! Branch layout !! Standards used
 |-
-| <code>bip380-bip389-multipath</code> || <code>publicWalletDescriptor</code> || One descriptor using a multipath branch expression such as <code>&lt;0;1&gt;/*</code> || [https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki BIP-32], [https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki BIP-44], [https://slips.readthedocs.io/en/latest/slip-0044/ SLIP-0044], the relevant purpose BIP such as [https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki BIP-84], [https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki BIP-380], and [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389]
+| <code>bip380-bip389-multipath</code> || <code>publicWalletDescriptor</code> || One descriptor using a multipath branch expression such as <code><0;1>/*</code> || [https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki BIP-32], [https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki BIP-44], [https://slips.readthedocs.io/en/latest/slip-0044/ SLIP-0044], the relevant purpose BIP such as [https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki BIP-84], [https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki BIP-380], and [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389]
 |-
 | <code>bip380-split-branches</code> || <code>publicWalletDescriptor</code> || Separate external and internal descriptors without multipath syntax || [https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki BIP-32], [https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki BIP-44], [https://slips.readthedocs.io/en/latest/slip-0044/ SLIP-0044], the relevant purpose BIP such as [https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki BIP-84], and [https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki BIP-380]
 |-
-| <code>elip150-public-ct-bip389-multipath</code> || <code>publicConfidentialDescriptor</code> || One [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] CT descriptor using a multipath branch expression such as <code>&lt;0;1&gt;/*</code> || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] plus the standards used by <code>bip380-bip389-multipath</code>
+| <code>elip150-public-ct-bip389-multipath</code> || <code>publicConfidentialDescriptor</code> || One [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] CT descriptor using a multipath branch expression such as <code><0;1>/*</code> || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] plus the standards used by <code>bip380-bip389-multipath</code>
 |-
 | <code>elip150-public-ct-split-branches</code> || <code>publicConfidentialDescriptor</code> || Separate external and internal [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] CT descriptors without multipath syntax || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0150.mediawiki ELIP-0150] plus the standards used by <code>bip380-split-branches</code>
 |}
@@ -194,10 +197,9 @@ by wallet policy, the wallet MUST return a JSON-RPC error with <code>reason = "u
 and SHOULD include the requested and supported format profile names in <code>error.data</code>.
 
 Returned descriptors MUST be normalized and include a valid [https://github.com/bitcoin/bips/blob/master/bip-0380.mediawiki BIP-380] checksum.
-A dapp MUST verify the descriptor checksum and MUST verify that the external branch at index <code>0</code> derives
-the returned <code>accountIdentifier</code>. For <code>publicConfidentialDescriptor</code>, the embedded ordinary descriptor
-MUST describe the same script tree as the corresponding <code>publicWalletDescriptor</code>, and its external branch at
-index <code>0</code> MUST correspond to the same <code>accountIdentifier</code> script.
+Wallets MUST ensure that every descriptor returned in one response belongs to the same connected account identifier.
+For <code>publicConfidentialDescriptor</code>, the embedded ordinary descriptor MUST describe the same script tree as the corresponding <code>publicWalletDescriptor</code>.
+Dapps MUST verify descriptor checksums before using returned descriptors.
 
 ===RPC methods===
 
@@ -223,8 +225,6 @@ The transaction MUST be constructed, blinded whenever possible, signed, and broa
 |-
 | <code>account</code> || String || No || Connected account. If omitted, the wallet chooses the connected account according to session context and MUST show the selected account before approval.
 |-
-| <code>changeAddress</code> || String || No || Confidential Liquid change address. Wallets MAY ignore this field and derive change internally.
-|-
 | <code>memo</code> || String || No || Hex-encoded bytes without <code>0x</code>. Wallets that support memos MUST encode the value as an <code>OP_RETURN</code> output and MUST enforce a maximum of 80 bytes.
 |}
 
@@ -242,7 +242,7 @@ Example request:
   "jsonrpc": "2.0",
   "method": "sendTransfer",
   "params": {
-    "account": "bip122:1466275836220db2944ca059a3a10ef6:ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a",
+    "account": "bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799",
     "recipientAddress": "lq1qqfk0uw9vlmqlggzs7cxmw49x8ks37l87udspmpt3ssgxjrkqqlww63xvus3c5gaz89r2kd393c4fvurwxf06qj87y2kd3vsln",
     "amount": "123000000",
     "memo": "4c69717569642057616c6c6574205250432050726f66696c65"
@@ -268,7 +268,11 @@ This method returns public descriptor material for the connected Liquid account.
 The caller selects the disclosure type with <code>descriptorType</code> and MAY provide an ordered <code>accept</code>
 list of descriptor format profiles that it can parse.
 
-The default <code>descriptorType</code> is <code>publicWalletDescriptor</code>.
+Descriptor disclosure is watch-only script-graph disclosure. Wallets MUST NOT return <code>publicWalletDescriptor</code>
+or <code>publicConfidentialDescriptor</code> unless descriptor disclosure for the connected account is authorized by
+the active session or approved for the individual request. The default <code>descriptorType</code> is
+<code>publicWalletDescriptor</code>, but the default only selects the requested disclosure type; it does not remove
+the authorization or approval requirement.
 Wallets MUST NOT return <code>publicConfidentialDescriptor</code> unless it was explicitly requested and approved.
 Wallets MUST NOT return <code>viewDescriptor</code> from this method.
 
@@ -292,7 +296,7 @@ Allowed <code>accept[].format</code> values are <code>bip380-bip389-multipath</c
 |-
 | <code>chainId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
 |-
-| <code>accountIdentifier</code> || String || Yes || Connected account identifier.
+| <code>accountIdentifier</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
 |-
 | <code>policyAssetId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
 |-
@@ -326,10 +330,12 @@ Each descriptor entry has the following fields:
 |}
 
 Wallets MUST reject unsupported <code>descriptorType</code> values. Wallets MUST NOT return any descriptor type that
-was not requested. Wallets SHOULD respect the order of the <code>accept</code> list.
+was not requested. Wallets MUST verify that the session permission or per-request approval covers the requested
+<code>descriptorType</code> and selected descriptor format profile. Wallets SHOULD respect the order of the <code>accept</code> list.
 Wallets MUST NOT return private spend keys, spend descriptors, master blinding keys, descriptor blinding private keys,
 descriptor blinding xprvs, asset blinding factors, value blinding factors, shared nonces, or per-address private blinding keys.
-Wallets MUST derive <code>accountIdentifier</code> from the public wallet descriptor, even when returning a public confidential descriptor.
+Wallets MUST return the [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account identifier
+for the same descriptor set as the returned public wallet descriptor, even when returning a public confidential descriptor.
 
 Example request for a public wallet descriptor with [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] multipath fallback to split branches:
 
@@ -356,7 +362,7 @@ Example result:
   "jsonrpc": "2.0",
   "result": {
     "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
-    "accountIdentifier": "ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a",
+    "accountIdentifier": "bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799",
     "policyAssetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
     "descriptors": [
       {
@@ -371,7 +377,7 @@ Example result:
           "bip-0380",
           "bip-0389"
         ],
-        "descriptor": "elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/&lt;0;1&gt;/*)#csxkmyvv",
+        "descriptor": "elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*)#csxkmyvv",
         "branches": [
           { "branch": "external", "change": 0, "addressIndex": "*" },
           { "branch": "internal", "change": 1, "addressIndex": "*" }
@@ -395,13 +401,18 @@ elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANU
 Example public confidential descriptor:
 
 <pre>
-ct(02dce16018bbbb8e36de7b394df5b5166e9adb7498be7d881a85a09aeecf76b623,elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/&lt;0;1&gt;/*))#06l0zt2p
+ct(036907dadd77ba1798e89237874c52c6c6954b2f64490d48aadc5b0cbed3f589d5,elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*))#em5whsyz
 </pre>
 
 ====<code>getBalance</code>====
 
 This method returns the wallet-computed balance for the connected Liquid account. The only filter parameter
-is <code>assetId</code>. If <code>assetId</code> is omitted, the wallet MUST return the balance for the network policy asset.
+is <code>assetId</code>. Wallets MUST treat this method as account-state disclosure and MUST require either
+session authorization for balance reads or per-request user approval. The authorization or approval MUST identify
+the connected account and whether it covers the policy asset, the requested <code>assetId</code>, or all assets, and
+it MUST be bounded by the active session lifetime. If the requested asset scope is not authorized by the session,
+the wallet MUST require per-request approval.
+If <code>assetId</code> is omitted, the wallet MUST return the balance for the network policy asset.
 If <code>assetId</code> is provided, the wallet MUST return the balance for that exact
 [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID and MUST reject the
 request if the asset ID <code>chain_id</code> does not match the active Liquid or Elements chain.
@@ -421,7 +432,7 @@ asset blinding factors, value blinding factors, shared nonces, or view-capable d
 |-
 | <code>chainId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
 |-
-| <code>accountIdentifier</code> || String || Yes || Connected account identifier.
+| <code>accountIdentifier</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
 |-
 | <code>policyAssetId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
 |-
@@ -451,7 +462,7 @@ Example result:
   "jsonrpc": "2.0",
   "result": {
     "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
-    "accountIdentifier": "ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a",
+    "accountIdentifier": "bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799",
     "policyAssetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
     "assetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
     "balance": "123456"
@@ -462,6 +473,11 @@ Example result:
 ====<code>getUTXOs</code>====
 
 This method returns UTXOs for the connected Liquid account. The only filter parameter is <code>assetId</code>.
+Wallets MUST treat this method as account-state disclosure and MUST require either session authorization
+for UTXO reads or per-request user approval. The authorization or approval MUST identify the connected account
+and whether it covers the policy asset, the requested <code>assetId</code>, or all assets, and it MUST be bounded by
+the active session lifetime. If the requested asset scope is not authorized by the session, the wallet MUST require
+per-request approval.
 If <code>assetId</code> is omitted, the wallet MUST return UTXOs for the network policy asset.
 If <code>assetId</code> is provided, the wallet MUST return UTXOs for that exact [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID
 and MUST reject the request if the asset ID <code>chain_id</code> does not match the active Liquid or Elements chain.
@@ -482,7 +498,7 @@ value blinding factors, shared nonces, or view-capable descriptor material.
 |-
 | <code>chainId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
 |-
-| <code>accountIdentifier</code> || String || Yes || Connected account identifier.
+| <code>accountIdentifier</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
 |-
 | <code>policyAssetId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
 |-
@@ -543,7 +559,7 @@ Example result:
   "jsonrpc": "2.0",
   "result": {
     "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
-    "accountIdentifier": "ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a",
+    "accountIdentifier": "bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799",
     "policyAssetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
     "assetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
     "utxos": [
@@ -568,6 +584,8 @@ Example result:
 This method returns the deterministic public key used for identity-signing flows.
 It follows [https://github.com/satoshilabs/slips/blob/master/slip-0013.md SLIP-0013].
 The identity key is not a transaction spend key and MUST NOT be derived from a wallet address path.
+Wallets MUST display the identity string, curve, and index before approval unless the exact identity key disclosure
+is already authorized by the session.
 
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
@@ -626,10 +644,15 @@ Example result:
 
 ====<code>getIdentitySharedKey</code>====
 
-This method returns a shared key for an identity and a counterparty public key.
-It follows [https://github.com/satoshilabs/slips/blob/master/slip-0017.md SLIP-0017].
-The default KDF is <code>none</code>, which returns the raw 32-byte ECDH result. The optional KDF <code>hkdf-sha256</code>
-applies [https://www.rfc-editor.org/rfc/rfc5869 RFC 5869] HKDF-SHA256 to the raw ECDH result.
+This method returns a domain-separated shared key for an identity and a counterparty public key.
+It follows [https://github.com/satoshilabs/slips/blob/master/slip-0017.md SLIP-0017] for identity-key derivation and
+[https://www.rfc-editor.org/rfc/rfc5869 RFC 5869] HKDF-SHA256 for the returned key.
+
+Wallets MUST validate that <code>theirPublicKey</code> is a valid point on <code>nist256p1</code> and MUST reject invalid,
+low-order, or unsupported public keys. Wallets MUST bind authorization for this method to the authenticated caller
+origin or transport identity and to the connected account. Wallets MUST display the identity string, counterparty
+key fingerprint, curve, index, connected account, and domain-separation context before approval unless the exact
+origin-bound and account-bound request is already authorized by the session.
 
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
@@ -642,11 +665,11 @@ applies [https://www.rfc-editor.org/rfc/rfc5869 RFC 5869] HKDF-SHA256 to the raw
 |-
 | <code>index</code> || Integer || No || Identity-key index. Default is <code>0</code>.
 |-
-| <code>kdf</code> || String || No || Supported values: <code>none</code> and <code>hkdf-sha256</code>. Default is <code>none</code>.
+| <code>kdf</code> || String || Yes || Supported value: <code>hkdf-sha256</code>.
 |-
-| <code>kdfSalt</code> || String || Conditional || Required when <code>kdf</code> is <code>hkdf-sha256</code>. Salt bytes as lowercase hex without <code>0x</code>.
+| <code>kdfSalt</code> || String || Yes || HKDF salt bytes as lowercase hex without <code>0x</code>.
 |-
-| <code>kdfInfo</code> || String || Conditional || Required when <code>kdf</code> is <code>hkdf-sha256</code>. Info bytes as lowercase hex without <code>0x</code>.
+| <code>kdfInfo</code> || String || Yes || HKDF info bytes as lowercase hex without <code>0x</code>. The value MUST domain-separate the intended protocol and MUST commit to the dapp origin or transport identity, active <code>chain_id</code>, and account identifier. Wallets MUST reject the request when this context is absent or inconsistent with the authenticated caller or connected account.
 |}
 
 {| class="wikitable"
@@ -662,9 +685,9 @@ applies [https://www.rfc-editor.org/rfc/rfc5869 RFC 5869] HKDF-SHA256 to the raw
 |-
 | <code>publicKey</code> || String || Yes || Wallet identity public key as lowercase hex without <code>0x</code>.
 |-
-| <code>sharedKey</code> || String || Yes || Raw ECDH result or HKDF output as lowercase hex without <code>0x</code>.
+| <code>sharedKey</code> || String || Yes || HKDF-SHA256 output as lowercase hex without <code>0x</code>.
 |-
-| <code>kdf</code> || String || Yes || Applied KDF: <code>none</code> or <code>hkdf-sha256</code>.
+| <code>kdf</code> || String || Yes || Applied KDF: <code>hkdf-sha256</code>.
 |}
 
 Example request:
@@ -681,7 +704,7 @@ Example request:
     "index": 0,
     "kdf": "hkdf-sha256",
     "kdfSalt": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
-    "kdfInfo": "4c69717569642057616c6c6574205250432050726f66696c65206964656e7469747920736861726564206b6579207631"
+    "kdfInfo": "4c69717569642057616c6c6574205250432050726f66696c65206964656e7469747920736861726564206b65792076317c6f726967696e3d68747470733a2f2f6578616d706c652e636f6d7c636861696e5f69643d6269703132323a31343636323735383336323230646232393434636130353961336131306566367c6163636f756e743d6269703132323a31343636323735383336323230646232393434636130353961336131306566363a623738312d376263372d646236342d633364652d333933372d376562372d633961622d66373939"
   }
 }
 </pre>
@@ -698,7 +721,7 @@ Example result:
     "index": 0,
     "type": "slip-0017",
     "publicKey": "045b2d18e9ce5c62c6dff146c3453e672ea83606b9841e32fa6793115f23589c696aba3c36c1b08eae7a3c8b9d81878ccddf84adce4d72811867de60922f70fa1a",
-    "sharedKey": "b5adc5d2a7d19baff144e765eb448fbf1decc7e6bc6b309d8ed0f7a202d1561e",
+    "sharedKey": "fd1efbd05dbd13aa8e33d498f3d3b0e3b1a635fa1925fa64902fc43ac17524fb",
     "kdf": "hkdf-sha256"
   }
 }
@@ -709,6 +732,8 @@ Example result:
 This method signs a caller-provided challenge with the deterministic identity-signing key.
 It follows [https://github.com/satoshilabs/slips/blob/master/slip-0013.md SLIP-0013].
 This method is for identity proof and MUST NOT be displayed or interpreted as transaction approval.
+Wallets MUST display the identity string, challenge summary, curve, and index before approval unless the exact
+signing request is already authorized by the session.
 
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
@@ -821,11 +846,11 @@ Wallets MUST reject bare <code>128</code> in <code>sighashTypes</code>.
 |-
 | <code>128</code> || <code>0x80</code> || <code>SIGHASH_ANYONECANPAY</code> || Flag only. When combined with a base mode, signs only this input. MUST NOT be used alone.
 |-
-| <code>129</code> || <code>0x81</code> || <code>SIGHASH_ALL &#124; SIGHASH_ANYONECANPAY</code> || Signs all outputs and only this input.
+| <code>129</code> || <code>0x81</code> || <code>SIGHASH_ALL | SIGHASH_ANYONECANPAY</code> || Signs all outputs and only this input.
 |-
-| <code>130</code> || <code>0x82</code> || <code>SIGHASH_NONE &#124; SIGHASH_ANYONECANPAY</code> || Signs no outputs and only this input.
+| <code>130</code> || <code>0x82</code> || <code>SIGHASH_NONE | SIGHASH_ANYONECANPAY</code> || Signs no outputs and only this input.
 |-
-| <code>131</code> || <code>0x83</code> || <code>SIGHASH_SINGLE &#124; SIGHASH_ANYONECANPAY</code> || Signs the output whose index matches this input index and only this input. Wallets MUST reject this mode if the matching output is absent.
+| <code>131</code> || <code>0x83</code> || <code>SIGHASH_SINGLE | SIGHASH_ANYONECANPAY</code> || Signs the output whose index matches this input index and only this input. Wallets MUST reject this mode if the matching output is absent.
 |}
 
 {| class="wikitable"
@@ -840,6 +865,16 @@ Wallets MUST verify that each listed <code>address</code> corresponds to the inp
 to a descriptor path controlled by the connected wallet.
 Wallets MUST verify all confidential transaction data needed for safe signing from the PSET and wallet policy.
 This method does not define separate asset metadata, review hints, output hints, or trusted-commitment fields.
+Wallets MUST display the requested input indexes, allowed sighash modes, broadcast flag, and wallet-computed
+net asset movement before approval. Wallets MUST reject the request if they cannot compute a safe review of
+wallet inputs, wallet outputs, fees, and confidentiality status.
+Before returning a PSET, wallets MUST NOT add wallet-derived blinding private keys, master blinding keys,
+descriptor blinding private keys, asset blinding factors, value blinding factors, shared nonces, or other unblinding secrets.
+If a received PSET already contains such data, including fields such
+as [https://github.com/ElementsProject/ELIPs/blob/main/elip-0102.mediawiki ELIP-0102] asset blinding factor extensions,
+or if wallet signing would otherwise add such data, wallets MUST redact wallet-derived secrets before returning the PSET.
+If redaction is not possible without changing the requested signing result, wallets MUST reject the request instead of
+returning a PSET that contains wallet-derived unblinding secrets.
 When signing a PSET constructed from <code>getUTXOs</code> results, wallets MUST verify that each
 signed input still refers to a known wallet UTXO and that the PSET previous-output data matches wallet state.
 If <code>broadcast</code> is <code>true</code>, wallets MAY broadcast only after the transaction is complete and user approval covers broadcast.
@@ -959,6 +994,9 @@ Wallets that support this method MUST implement it as described by the
 [https://github.com/KyrylR/ELIPs/blob/c946695f75f98477008bad0059d2894696bbaadd/elip-wallet-abi.mediawiki Wallet ABI Transaction Creation Protocol].
 The JSON-RPC request MUST carry the Wallet ABI transaction request object.
 The JSON-RPC result MUST carry the Wallet ABI transaction response object.
+Wallets MUST reject requests whose Wallet ABI version, account scope, chain ID, approval requirements, or redaction
+requirements are not supported or authorized. The Wallet ABI reference above is provisional; before this ELIP is finalized,
+it MUST be replaced by a canonical Wallet ABI ELIP or upstream repository reference.
 
 ===Events===
 
@@ -968,7 +1006,7 @@ This event notifies dapps that descriptor metadata for the connected Liquid acco
 The event data has the same shape as the <code>getWalletDescriptor</code> result.
 
 Wallets SHOULD emit this event when the descriptor set for the connected account changes,
-when the account identifier derived from the public wallet descriptor changes,
+when the account identifier for the connected account changes,
 or when the network policy asset ID changes because the wallet switched Liquid or Elements chains.
 Wallets MUST NOT emit <code>viewDescriptor</code>, view-capable descriptor material, or blinding secrets through this event.
 Descriptor entries in event data MUST be <code>publicWalletDescriptor</code> or <code>publicConfidentialDescriptor</code>
@@ -985,7 +1023,7 @@ Example <code>session_event</code> payload as received by a dapp:
       "name": "bip122_walletDescriptorChanged",
       "data": {
         "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
-        "accountIdentifier": "ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a",
+        "accountIdentifier": "bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799",
         "policyAssetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
         "descriptors": [
           {
@@ -993,7 +1031,7 @@ Example <code>session_event</code> payload as received by a dapp:
             "format": "bip380-bip389-multipath",
             "branchLayout": "multipath",
             "standardsUsed": ["bip-0032", "bip-0044", "slip-0044", "bip-0084", "bip-0380", "bip-0389"],
-            "descriptor": "elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/&lt;0;1&gt;/*)#csxkmyvv",
+            "descriptor": "elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*)#csxkmyvv",
             "canDeriveScriptPubKeys": true,
             "canDeriveConfidentialAddresses": false,
             "canUnblindOutputs": false
@@ -1014,40 +1052,78 @@ This profile specifies the event name and <code>event.data</code> shape; transpo
 * Wallets MUST validate that every <code>chainId</code>, <code>account</code>, and [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] <code>assetId</code> refers to the active Liquid or Elements chain.
 * Wallets MUST derive the active chain ID from node or runtime context, not from user-facing labels such as <code>Liquid</code>, <code>testnet-liquid</code>, or <code>localtest-liquid</code>.
 * Wallets MUST display asset, amount, recipient, fee asset, broadcast status, and confidentiality status before approving <code>sendTransfer</code>.
-* Wallets MUST display descriptor type, selected descriptor format, and disclosure consequences before approving <code>getWalletDescriptor</code>.
+* Wallets MUST treat <code>getWalletDescriptor</code> as descriptor disclosure and MUST only answer after descriptor disclosure is authorized by the active session or approved for the individual request. Wallets MUST display descriptor type, selected descriptor format, and disclosure consequences before per-request approval.
 * Wallets MUST treat [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077], private-key, xprv, and [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] CT descriptors as view-capable material that is not exported by this profile.
 * Wallets MUST NOT return view-capable CT descriptors, private spend keys, spend descriptors, master blinding keys, descriptor blinding private keys, descriptor blinding xprvs, per-address private blinding keys, asset blinding factors, value blinding factors, or shared nonces through this profile. The only CT descriptor that may be returned is <code>publicConfidentialDescriptor</code> with public blinding-key material.
 * Wallets MUST NOT log view-capable descriptor material, private blinding material, identity shared keys, intermediate PSETs containing secrets, or Wallet ABI payloads containing unblinding data.
-* Wallets MUST treat <code>getBalance</code> and <code>getUTXOs</code> as account-state disclosure methods and MUST only answer them for accounts authorized in the active session.
+* Wallets that support <code>processConfidentialTransaction</code> MUST enforce the Wallet ABI version, account scope, transaction approval, result shape, and artifact redaction rules from the referenced Wallet ABI protocol.
+* Wallets MUST treat <code>getBalance</code> and <code>getUTXOs</code> as account-state disclosure methods and MUST only answer them for accounts authorized in the active session and after the relevant session permission or per-request approval. The permission or approval MUST define the account, method, asset scope, and active-session lifetime.
+* Wallets MUST treat <code>signPset</code> as transaction approval, display sighash scope and wallet-computed net asset movement, and MUST redact wallet-derived blinding secrets from the PSET response or reject the request.
+* Wallets MUST require domain separation for <code>getIdentitySharedKey</code> by applying <code>hkdf-sha256</code> with caller-provided salt and info that commits to the authenticated caller origin or transport identity, active <code>chain_id</code>, and account identifier.
 * Dapps MUST NOT assume that a public descriptor or an account identifier is sufficient to calculate balances or reconstruct the wallet UTXO set.
 * Identity keys MUST be domain-separated from transaction spend keys and descriptor blinding keys.
 
 ==Rationale==
 
-This profile uses the first external unconfidential address derived from the public wallet descriptor as
-the account identifier because dapps need a stable identifier that they can display, persist, and verify against the returned public descriptor.
-The account identifier is not a receive address and does not describe wallet balance or UTXO state.
+===ELIP-0144 account identifiers===
 
-Descriptor format negotiation is expressed as an ordered <code>accept</code> list of descriptor format profiles
-rather than as a list of individual BIPs, SLIPs, and ELIPs.
+This profile uses the [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144]
+<code>chain_id:dwid</code> account ID form because Liquid accounts should not be represented by receive addresses.
+The DWID component identifies the wallet descriptor set without turning an address into a long-lived account handle.
+
+For display, applications can abbreviate the account identifier by showing a short prefix of the <code>chain_id</code>
+and the start and end of the DWID, for example <code>14662758…0ef6:b781…f799</code>.
+The full account identifier remains the value that is persisted and compared.
+
+===Descriptor format profiles===
+
+Descriptor format negotiation is expressed as an ordered <code>accept</code> list of descriptor format profiles rather
+than as a list of individual BIPs, SLIPs, and ELIPs.
 This keeps the request focused on what the dapp can parse and use.
 For example, a dapp that cannot parse [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389]
-can request <code>bip380-split-branches</code> instead of trying to exclude [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389]
-while still naming all other standards.
+can request <code>bip380-split-branches</code> instead of trying to
+exclude [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] while still naming all other standards.
+
+===Descriptor disclosure and wallet state disclosure===
 
 The profile separates descriptor disclosure from balance and UTXO disclosure.
 A public wallet descriptor is useful for derivation and verification, but it is not enough to compute confidential balances.
 <code>getBalance</code> and <code>getUTXOs</code> return wallet-computed values without exporting view descriptors or blinding secrets.
 
-The profile permits public confidential descriptors only when the blinding material is public and
-not recoverable as private view material from data disclosed to the dapp.
-It does not return [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] descriptors,
-[https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private material, descriptor blinding private keys,
-or descriptor blinding xprvs, because those forms let the holder unblind wallet outputs.
+===Public confidential descriptors===
 
-<code>processConfidentialTransaction</code> is delegated to the Wallet ABI transaction creation protocol to avoid duplicating
-a larger confidential transaction schema in this profile.
-This ELIP specifies the JSON-RPC binding and leaves the transaction object shapes to that protocol.
+The profile permits public confidential descriptors only when the blinding material is public and not recoverable
+as private view material from data disclosed to the dapp.
+It does not return [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] descriptors,
+[https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077] private material, descriptor blinding
+private keys, or descriptor blinding xprvs, because those forms let the holder unblind wallet outputs.
+
+===No caller-provided change address===
+
+This profile does not define a caller-provided change address field for <code>sendTransfer</code>.
+Caller-provided change addresses are a fund-loss footgun when the address is not wallet-owned or does not match wallet policy.
+Wallets derive change internally instead.
+
+===PSET signing and response redaction===
+
+PSET signing can expose more than signatures if a wallet adds wallet-derived blinding data to the returned PSET.
+The signing method therefore requires wallet-side review and requires wallets to redact wallet-derived secrets from the
+returned PSET or reject the request when safe redaction is not possible.
+
+===Identity shared keys===
+
+The shared-key method returns an application key, not raw ECDH output.
+Requiring HKDF-SHA256 and caller-provided domain-separation data that commits to the caller origin,
+active <code>chain_id</code>, and account identifier prevents the same raw ECDH value from being reused across
+protocols, origins, chains, or accounts.
+
+===Wallet ABI delegation===
+
+<code>processConfidentialTransaction</code> is delegated to the Wallet ABI transaction creation protocol to
+avoid duplicating a larger confidential transaction schema in this profile.
+This ELIP specifies the JSON-RPC binding and leaves account scoping, ABI versioning, transaction approval,
+result shape, and artifact redaction rules to that protocol. Because the reference is still provisional, this ELIP
+must be updated to point at a canonical Wallet ABI ELIP or upstream repository reference before finalization.
 
 ==Reference Implementation==
 
@@ -1058,9 +1134,10 @@ TBD.
 The following values were derived and statically validated with [https://docs.rs/lwk_bindings/latest/lwk/ Liquid Wallet Kit].
 
 <pre>
-public_wallet_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/&lt;0;1&gt;/*)#csxkmyvv
-account_identifier       = ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a
-account                  = bip122:1466275836220db2944ca059a3a10ef6:ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a
+public_wallet_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*)#csxkmyvv
+dwid                     = b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
+account_identifier       = bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
+address_index_0          = ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a
 policy_asset_id          = bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d
 </pre>
 
@@ -1082,13 +1159,13 @@ slip0017_public_key = 045b2d18e9ce5c62c6dff146c3453e672ea83606b9841e32fa6793115f
 peer_public_key     = 04c95ff5052c66d17ecbf08eafe00aade2071830b0bafc8e87b3debffbfa1b733272900303e6688e025f9744e6c6e6961c5861138cc4e909eeedd84c84311b5ca1
 raw_shared_key      = c78d6f0cde624fdbadb88c7d6af291530ee0a203938c7d88b6a2c5ab4d85d3c8
 hkdf_salt           = 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
-hkdf_info           = 4c69717569642057616c6c6574205250432050726f66696c65206964656e7469747920736861726564206b6579207631
-hkdf_shared_key     = b5adc5d2a7d19baff144e765eb448fbf1decc7e6bc6b309d8ed0f7a202d1561e
+hkdf_info           = 4c69717569642057616c6c6574205250432050726f66696c65206964656e7469747920736861726564206b65792076317c6f726967696e3d68747470733a2f2f6578616d706c652e636f6d7c636861696e5f69643d6269703132323a31343636323735383336323230646232393434636130353961336131306566367c6163636f756e743d6269703132323a31343636323735383336323230646232393434636130353961336131306566363a623738312d376263372d646236342d633364652d333933372d376562372d633961622d66373939
+hkdf_shared_key     = fd1efbd05dbd13aa8e33d498f3d3b0e3b1a635fa1925fa64902fc43ac17524fb
 message_hash        = 95b7987475f7157b80aa3c5087d910e44429f410cd3b12c25a652e9c2d480d89
 message_signature   = ded4c5a767265f1df01b5453da8df9d364d81775d780c8f52707573a68c485152f59a354eec5c935072eff8e6d14d3c6744659fc405cad88e395afd9493cdd3a00
 </pre>
 
-The following PSET values are constructed from an explicit policy-asset UTXO at the account identifier script and were parsed with [https://docs.rs/lwk_bindings/latest/lwk/ Liquid Wallet Kit]. The signed PSET was produced with the Liquid Wallet Kit signer for the same mnemonic.
+The following PSET values are constructed from an explicit policy-asset UTXO at the example script and were parsed with [https://docs.rs/lwk_bindings/latest/lwk/ Liquid Wallet Kit]. The signed PSET was produced with the Liquid Wallet Kit signer for the same mnemonic.
 
 <pre>
 example_utxo_txid = 4b33bd9a251311bd7f247ea19b3cf9887977ba4d9abe2ec7886de24094252586
