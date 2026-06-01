@@ -808,10 +808,10 @@ Wallets MUST NOT sign inputs that are not explicitly listed in <code>signInputs<
 | <code>broadcast</code> || Boolean || No || If <code>true</code>, the wallet MAY finalize and broadcast the transaction after signing. Default is <code>false</code>.
 |}
 
-The <code>pset</code> parameter MUST be the base64 encoding of a complete PSET serialization, including the PSET magic bytes,
-global map, input maps, output maps, and map separators defined by the Elements PSET format. It MUST NOT be a raw Elements
-transaction, a transaction hex string, or a Bitcoin PSBT. Transaction data to be reviewed and signed MUST be present in the PSET
-or be available from wallet state for wallet-owned inputs.
+The method MUST ignore signing inputs that were not requested.
+
+During the signing process, a PSET can contain Simplicity inputs or any other inputs for which the wallet cannot provide valid witness data.
+Therefore, if the user requests signing for such an input, the wallet MUST return an error.
 
 Each <code>signInputs</code> entry has the following fields:
 
@@ -994,7 +994,7 @@ The JSON-RPC request MUST carry the Wallet ABI transaction request object.
 The JSON-RPC result MUST carry the Wallet ABI transaction response object.
 Wallets MUST reject requests whose Wallet ABI version, account scope, chain ID, approval requirements are not supported or authorized.
 
-// TODO The Wallet ABI reference above is provisional; before this ELIP is finalized, it MUST be replaced by a canonical Wallet ABI ELIP or upstream repository reference.
+<!-- TODO: The Wallet ABI reference above is provisional; before this ELIP is finalized, replace it with a canonical Wallet ABI ELIP or upstream repository reference. -->
 
 ===Events===
 
