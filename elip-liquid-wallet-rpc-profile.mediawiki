@@ -1098,6 +1098,47 @@ avoid duplicating a larger confidential transaction schema in this profile.
 This ELIP specifies the JSON-RPC binding and leaves account scoping, ABI versioning, transaction approval,
 result shape, and artifact redaction rules to that protocol.
 
+==Security Considerations==
+
+===Transport integrity===
+
+Implementers of this RPC profile should account for common transport-layer attacks, such as man-in-the-middle
+attacks, replay, request substitution, and response substitution. The transport used to carry these JSON-RPC
+messages should provide authenticated peers, message integrity, and confidentiality appropriate for the deployment.
+
+===Blind signing and transaction review===
+
+Wallets that implement this profile should make a best effort to prevent blind signing. If a transaction or PSET
+cannot be explained to the user with high assurance, the wallet should reject the request instead of asking the
+user to approve data that the wallet cannot safely interpret.
+
+===ECDSA signature encoding===
+
+Methods that return ECDSA signatures, such as <code>signIdentity</code> and <code>signMessage</code> when
+<code>protocol = ecdsa</code>, should use canonical signature encodings. ECDSA signatures are malleable unless
+the <code>s</code> value is normalized or otherwise constrained; for a valid <code>(r, s)</code> signature, the
+corresponding high-S or low-S form can also verify if the implementation accepts both.
+
+Some recoverable ECDSA encodings include a recovery identifier, commonly called <code>v</code> or
+<code>recId</code>. This value is metadata used for public-key recovery and address or key-context selection.
+It should not be interpreted as a second user approval or as the reason that multiple ECDSA encodings can verify
+the same message. Implementations that compare signatures as authorization artifacts should compare canonicalized
+signatures or verify the signed message and public key instead of relying on raw signature-byte equality.
+
+===Shared-key approval context===
+
+The <code>kdfInfo</code> value in <code>getIdentitySharedKey</code> is caller-provided domain-separation data.
+Wallets should treat it with caution when presenting an approval prompt. If the wallet cannot parse or explain
+the protocol, origin or authenticated caller identity, active <code>chain_id</code>, and account commitment in
+<code>kdfInfo</code>, the request should be treated as the same class of blind-approval risk as blind signing.
+
+===Privacy disclosure===
+
+In the worst case, authorized use of this profile can expose the account's derivable address chain, current
+balances, and UTXO set at a particular point in time. Correct implementations of this profile do not return
+descriptors or other material with unblinding capabilities. This design is intended to prevent common privacy
+footguns in privacy-oriented Liquid applications.
+
 ==Reference Implementation==
 
 TBD.
