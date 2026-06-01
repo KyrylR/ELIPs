@@ -94,7 +94,7 @@ The following terms are used throughout this ELIP.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHOULD", "SHOULD NOT", and "MAY" in this document are to be interpreted as described in [https://www.rfc-editor.org/rfc/rfc2119 RFC 2119].
 
-===General===
+==General==
 
 Unless a method explicitly contains an <code>account</code> parameter, the wallet applies the method to the account
 authorized for the JSON-RPC request by the transport session. If more than one account is in scope and session
@@ -197,9 +197,9 @@ The recognized descriptor format profiles are:
 
 Future ELIPs MAY define additional descriptor format profiles.
 
-===RPC methods===
+==RPC methods==
 
-====<code>sendTransfer</code>====
+===<code>sendTransfer</code>===
 
 This method signs and submits a transfer of a Liquid asset to a single recipient address. If <code>assetId</code>
 is omitted, the wallet MUST send the network policy asset. If <code>assetId</code> is present,
@@ -258,7 +258,7 @@ Example result:
 }
 </pre>
 
-====<code>getWalletDescriptor</code>====
+===<code>getWalletDescriptor</code>===
 
 This method returns public descriptor for the connected Liquid account.
 The caller selects the disclosure type with <code>descriptorType</code> and MAY provide an ordered <code>descriptorFormat</code>
@@ -407,7 +407,7 @@ Example public confidential descriptor:
 ct(036907dadd77ba1798e89237874c52c6c6954b2f64490d48aadc5b0cbed3f589d5,elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*))#em5whsyz
 </pre>
 
-====<code>getBalance</code>====
+===<code>getBalance</code>===
 
 This method returns the wallet-computed balance for the connected Liquid account. The only filter parameter
 is <code>assetId</code>. Wallets MUST treat this method as account-state disclosure and MUST require either
@@ -470,7 +470,7 @@ Example result:
 }
 </pre>
 
-====<code>getUTXOs</code>====
+===<code>getUTXOs</code>===
 
 This method returns UTXOs for the connected Liquid account. The only filter parameter is <code>assetId</code>.
 Wallets MUST treat this method as account-state disclosure and MUST require either request-context authorization
@@ -576,7 +576,7 @@ Example result:
 }
 </pre>
 
-====<code>getIdentityPublicKey</code>====
+===<code>getIdentityPublicKey</code>===
 
 This method returns the deterministic public key used for identity-signing flows.
 It follows [https://github.com/satoshilabs/slips/blob/master/slip-0013.md SLIP-0013].
@@ -639,7 +639,7 @@ Example result:
 }
 </pre>
 
-====<code>getIdentitySharedKey</code>====
+===<code>getIdentitySharedKey</code>===
 
 This method returns a domain-separated shared key for an identity and a counterparty public key.
 It follows [https://github.com/satoshilabs/slips/blob/master/slip-0017.md SLIP-0017] for identity-key derivation and
@@ -722,7 +722,7 @@ Example result:
 }
 </pre>
 
-====<code>signIdentity</code>====
+===<code>signIdentity</code>===
 
 This method signs a caller-provided challenge with the deterministic identity-signing key.
 It follows [https://github.com/satoshilabs/slips/blob/master/slip-0013.md SLIP-0013].
@@ -791,7 +791,7 @@ Example result:
 }
 </pre>
 
-====<code>signPset</code>====
+===<code>signPset</code>===
 
 This method requests signatures for a PSET.
 Wallets MUST reject PSETs that cannot be associated with the active Liquid or Elements chain.
@@ -912,7 +912,7 @@ Example result:
 }
 </pre>
 
-====<code>signMessage</code>====
+===<code>signMessage</code>===
 
 This method signs a message with the spend key for a connected Liquid address. Message signing uses spend keys, not descriptor blinding keys or view keys.
 
@@ -984,7 +984,7 @@ Example result:
 }
 </pre>
 
-====<code>processConfidentialTransaction</code>====
+===<code>processConfidentialTransaction</code>===
 
 This method is optional. It delegates request and response shape to the Wallet ABI transaction creation protocol.
 
@@ -996,9 +996,9 @@ Wallets MUST reject requests whose Wallet ABI version, account scope, chain ID, 
 
 <!-- TODO: The Wallet ABI reference above is provisional; before this ELIP is finalized, replace it with a canonical Wallet ABI ELIP or upstream repository reference. -->
 
-===Events===
+==Events==
 
-====<code>bip122_walletDescriptorChanged</code>====
+===<code>bip122_walletDescriptorChanged</code>===
 
 This event notifies dapps that descriptor metadata for the connected Liquid account changed.
 The event data has the same shape as the <code>getWalletDescriptor</code> result.
@@ -1037,21 +1037,6 @@ Example event object:
 
 This profile specifies the event name and <code>data</code> shape. Envelope fields such as request identifiers,
 routing metadata, or delivery acknowledgements are outside this profile and are controlled by the implementation context.
-
-==Security Considerations==
-
-* Wallets MUST validate that every <code>chainId</code>, <code>account</code>, and [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] <code>assetId</code> refers to the active Liquid or Elements chain.
-* Wallets MUST derive the active chain ID from node or runtime context, not from user-facing labels such as <code>Liquid</code>, <code>testnet-liquid</code>, or <code>localtest-liquid</code>.
-* Wallets MUST display asset, amount, recipient, fee asset, broadcast status, and confidentiality status before approving <code>sendTransfer</code>.
-* Wallets MUST display descriptor type, selected descriptor format, and disclosure consequences before approving <code>getWalletDescriptor</code>.
-* Wallets MUST treat [https://github.com/satoshilabs/slips/blob/master/slip-0077.md SLIP-0077], private-key, xprv, and [https://github.com/ElementsProject/ELIPs/blob/main/elip-0151.mediawiki ELIP-0151] CT descriptors as view-capable material that is not exported by this profile.
-* Wallets MUST NOT return view-capable CT descriptors, private spend keys, spend descriptors, master blinding keys, descriptor blinding private keys, descriptor blinding xprvs, per-address private blinding keys, asset blinding factors, value blinding factors, or shared nonces through this profile. The only CT descriptor that may be returned is <code>publicConfidentialDescriptor</code> with public blinding-key material.
-* Wallets MUST NOT log view-capable descriptor material, private blinding keys, identity shared keys, intermediate PSETs containing secrets, or Wallet ABI payloads containing unblinding data.
-* Wallets MUST treat <code>getBalance</code> and <code>getUTXOs</code> as account-state disclosure methods and MUST only answer them for accounts authorized in the active request or connection context and after the relevant request-context permission or per-request approval.
-* Wallets MUST treat <code>signPset</code> as transaction approval, display sighash scope and wallet-computed net asset movement, and MUST redact or reject PSET responses that would return wallet-derived blinding secrets.
-* Wallets MUST require domain separation for <code>getIdentitySharedKey</code> by applying <code>hkdf-sha256</code> with caller-provided salt and info that binds the protocol, caller context when available, active <code>chain_id</code>, and account identifier.
-* Dapps MUST NOT assume that a public descriptor or an account identifier is sufficient to calculate balances or reconstruct the wallet UTXO set.
-* Identity keys MUST be domain-separated from transaction spend keys and descriptor blinding keys.
 
 ==Rationale==
 
