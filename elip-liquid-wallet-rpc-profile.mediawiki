@@ -201,7 +201,7 @@ Future ELIPs MAY define additional descriptor format profiles.
 
 ===<code>sendTransfer</code>===
 
-This method signs and submits a transfer of a Liquid asset to a single recipient address. If <code>assetId</code>
+This method is used to sign and submit a transfer of a Liquid asset to a single recipient address. If <code>assetId</code>
 is omitted, the wallet MUST send the network policy asset. If <code>assetId</code> is present,
 it MUST be an [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID
 whose <code>chain_id</code> matches the active Liquid or Elements chain.
@@ -213,21 +213,21 @@ The transaction MUST be constructed, blinded whenever possible, signed, and broa
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>recipientAddress</code> || String || Yes || Recipient Liquid address. Confidential addresses SHOULD be used.
+| <code>recipientAddress</code> || String || Yes || The recipient's Liquid address. Confidential addresses SHOULD be used.
 |-
-| <code>amount</code> || String || Yes || Amount in the asset base unit, encoded as a decimal string.
+| <code>amount</code> || String || Yes || The amount to send in the asset base unit, encoded as a decimal string.
 |-
-| <code>assetId</code> || String || No || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID. If omitted, the network policy asset is used.
+| <code>assetId</code> || String || No || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID. If omitted, the network policy asset is used.
 |-
-| <code>account</code> || String || No || Connected account. If omitted, the wallet chooses the connected account according to session context and MUST show the selected account before approval.
+| <code>account</code> || String || No || The connected account. If omitted, the wallet chooses the connected account according to the session context and MUST show the selected account before approval.
 |-
-| <code>memo</code> || String || No || Hex-encoded bytes without <code>0x</code>. Wallets that support memos MUST encode the value as an <code>OP_RETURN</code> output and MUST enforce a maximum of 80 bytes.
+| <code>memo</code> || String || No || The hex-encoded bytes without <code>0x</code>. Wallets that support memos MUST encode the value as an <code>OP_RETURN</code> output and MUST enforce a maximum of 80 bytes.
 |}
 
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>txid</code> || String || Yes || Transaction ID as 64 lowercase hex characters.
+| <code>txid</code> || String || Yes || The transaction ID as 64 lowercase hex characters.
 |}
 
 Example request:
@@ -260,7 +260,7 @@ Example result:
 
 ===<code>getWalletDescriptor</code>===
 
-This method returns public descriptor for the connected Liquid account.
+This method returns a public descriptor for the connected Liquid account.
 The caller selects the disclosure type with <code>descriptorType</code> and MAY provide an ordered <code>descriptorFormat</code>
 list of descriptor format profiles that it can parse.
 
@@ -277,9 +277,9 @@ and MUST identify the selected profile in the result.
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>descriptorType</code> || String || No || Requested descriptor disclosure type. Valid values are <code>publicWalletDescriptor</code> and <code>publicConfidentialDescriptor</code>. Default is <code>publicWalletDescriptor</code>.
+| <code>descriptorType</code> || String || No || The requested descriptor disclosure type. Valid values are <code>publicWalletDescriptor</code> and <code>publicConfidentialDescriptor</code>. Default is <code>publicWalletDescriptor</code>.
 |-
-| <code>descriptorFormat</code> || Array || No || Ordered descriptor format profiles accepted by the dapp. Each entry is an object with a required <code>format</code> field. Unknown formats are ignored if another accepted format can be returned.
+| <code>descriptorFormat</code> || Array || No || The ordered descriptor format profiles accepted by the dapp. Each entry is an object with a required <code>format</code> field. Unknown formats are ignored if another accepted format can be returned.
 |}
 
 Allowed <code>descriptorFormat[].format</code> values are <code>bip380-bip389-multipath</code>, <code>bip380-split-branches</code>,
@@ -288,13 +288,13 @@ Allowed <code>descriptorFormat[].format</code> values are <code>bip380-bip389-mu
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>chainId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
+| <code>chainId</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
 |-
-| <code>accountIdentifier</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
+| <code>accountIdentifier</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
 |-
-| <code>policyAssetId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
+| <code>policyAssetId</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
 |-
-| <code>descriptors</code> || Array || Yes || Descriptor entries returned by the wallet. Every entry MUST match the requested <code>descriptorType</code> and selected format profile.
+| <code>descriptors</code> || Array || Yes || The descriptor entries returned by the wallet. Every entry MUST match the requested <code>descriptorType</code> and selected format profile.
 |}
 
 Each descriptor entry has the following fields:
@@ -304,21 +304,21 @@ Each descriptor entry has the following fields:
 |-
 | <code>descriptorType</code> || String || Yes || <code>publicWalletDescriptor</code> or <code>publicConfidentialDescriptor</code>.
 |-
-| <code>format</code> || String || Yes || Selected descriptor format profile.
+| <code>format</code> || String || Yes || The selected descriptor format profile.
 |-
 | <code>branchLayout</code> || String || Yes || <code>multipath</code> or <code>split</code>.
 |-
-| <code>standardsUsed</code> || String[] || Yes || Exact standards used by the returned representation, such as <code>bip-0032</code>, <code>bip-0044</code>, <code>slip-0044</code>, <code>bip-0084</code>, <code>bip-0380</code>, <code>bip-0389</code>, and <code>elip-0150</code>.
+| <code>standardsUsed</code> || String[] || Yes || The exact standards used by the returned representation, such as <code>bip-0032</code>, <code>bip-0044</code>, <code>slip-0044</code>, <code>bip-0084</code>, <code>bip-0380</code>, <code>bip-0389</code>, and <code>elip-0150</code>.
 |-
-| <code>descriptor</code> || String || Conditional || Required when <code>branchLayout</code> is <code>multipath</code>. Normalized descriptor string with checksum.
+| <code>descriptor</code> || String || Conditional || Required when <code>branchLayout</code> is <code>multipath</code>. The normalized descriptor string with a checksum.
 |-
 | <code>branchDescriptors</code> || Array || Conditional || Required when <code>branchLayout</code> is <code>split</code>. Each entry contains <code>branch</code>, <code>change</code>, and <code>descriptor</code>.
 |-
-| <code>branches</code> || Array || No || Metadata for branches represented by a multipath descriptor. Each entry contains <code>branch</code>, <code>change</code>, and <code>addressIndex</code>.
+| <code>branches</code> || Array || No || Metadata for the branches represented by a multipath descriptor. Each entry contains <code>branch</code>, <code>change</code>, and <code>addressIndex</code>.
 |-
-| <code>canDeriveScriptPubKeys</code> || Boolean || Yes || Whether the descriptor entry can derive scriptPubKeys.
+| <code>canDeriveScriptPubKeys</code> || Boolean || Yes || Indicates whether the descriptor entry can derive scriptPubKeys.
 |-
-| <code>canDeriveConfidentialAddresses</code> || Boolean || Yes || Whether the descriptor entry can derive confidential addresses.
+| <code>canDeriveConfidentialAddresses</code> || Boolean || Yes || Indicates whether the descriptor entry can derive confidential addresses.
 |-
 | <code>canUnblindOutputs</code> || Boolean || Yes || MUST be <code>false</code> for every descriptor returned by this profile.
 |}
@@ -338,7 +338,7 @@ Wallets MUST return the [https://github.com/ElementsProject/ELIPs/blob/main/elip
 for the same descriptor set as the returned public wallet descriptor, even when returning a public confidential descriptor.
 
 If no requested format is supported or permitted by wallet policy, the wallet MUST return a JSON-RPC error
-with <code>reason = "unsupported_descriptor_format"</code>and SHOULD include the requested and supported format profile names in <code>error.data</code>.
+with <code>reason = "unsupported_descriptor_format"</code> and SHOULD include the requested and supported format profile names in <code>error.data</code>.
 
 Example request for a public wallet descriptor with [https://github.com/bitcoin/bips/blob/master/bip-0389.mediawiki BIP-389] multipath fallback to split branches:
 
@@ -430,15 +430,15 @@ asset blinding factors, value blinding factors, shared nonces, or view-capable d
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>chainId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
+| <code>chainId</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
 |-
-| <code>accountIdentifier</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
+| <code>accountIdentifier</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
 |-
-| <code>policyAssetId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
+| <code>policyAssetId</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
 |-
-| <code>assetId</code> || String || Yes || Asset ID whose balance was returned.
+| <code>assetId</code> || String || Yes || The asset ID whose balance was returned.
 |-
-| <code>balance</code> || String || Yes || Sum of known unspent wallet outputs for <code>assetId</code>, encoded as a decimal string in the asset base unit.
+| <code>balance</code> || String || Yes || The sum of known unspent wallet outputs for <code>assetId</code>, encoded as a decimal string in the asset base unit.
 |}
 
 Example request:
@@ -487,21 +487,21 @@ value blinding factors, shared nonces, or view-capable descriptor material.
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>assetId</code> || String || No || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID. If omitted, the network policy asset is used.
+| <code>assetId</code> || String || No || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID. If omitted, the network policy asset is used.
 |}
 
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>chainId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
+| <code>chainId</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] chain ID.
 |-
-| <code>accountIdentifier</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
+| <code>accountIdentifier</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID for the connected account.
 |-
-| <code>policyAssetId</code> || String || Yes || [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
+| <code>policyAssetId</code> || String || Yes || The [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the network policy asset.
 |-
-| <code>assetId</code> || String || Yes || Asset ID used to filter returned UTXOs.
+| <code>assetId</code> || String || Yes || The asset ID used to filter the returned UTXOs.
 |-
-| <code>utxos</code> || Array || Yes || UTXOs for the requested asset.
+| <code>utxos</code> || Array || Yes || The UTXOs for the requested asset.
 |}
 
 Each UTXO entry has the following fields:
@@ -509,23 +509,23 @@ Each UTXO entry has the following fields:
 {| class="wikitable"
 ! Field !! Type !! Required !! Description
 |-
-| <code>txid</code> || String || Yes || Transaction ID as 64 lowercase hex characters.
+| <code>txid</code> || String || Yes || The transaction ID as 64 lowercase hex characters.
 |-
-| <code>vout</code> || Integer || Yes || Output index.
+| <code>vout</code> || Integer || Yes || The output index.
 |-
-| <code>assetId</code> || String || Yes || Wallet-unblinded [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the UTXO.
+| <code>assetId</code> || String || Yes || The wallet-unblinded [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID of the UTXO.
 |-
-| <code>amount</code> || String || Yes || Wallet-unblinded amount in the asset base unit, encoded as a decimal string.
+| <code>amount</code> || String || Yes || The wallet-unblinded amount in the asset base unit, encoded as a decimal string.
 |-
 | <code>address</code> || String || Yes || Liquid confidential or unconfidential address whose script identifies the spend key for this UTXO. A dapp SHOULD use this value in <code>signPset.signInputs[].address</code> when constructing a PSET from this UTXO.
 |-
-| <code>scriptPubKey</code> || String || Yes || Raw scriptPubKey bytes as lowercase hex without <code>0x</code>.
+| <code>scriptPubKey</code> || String || Yes || The raw scriptPubKey bytes as lowercase hex without <code>0x</code>.
 |-
-| <code>txOut</code> || String || Yes || Raw Elements <code>TxOut</code> consensus serialization as lowercase hex without <code>0x</code>. It excludes output witness data.
+| <code>txOut</code> || String || Yes || The raw Elements <code>TxOut</code> consensus serialization as lowercase hex without <code>0x</code>. It excludes output witness data.
 |-
-| <code>confidential</code> || Boolean || Yes || Whether the previous output is confidential.
+| <code>confidential</code> || Boolean || Yes || Indicates whether the previous output is confidential.
 |-
-| <code>spendable</code> || Boolean || Yes || Whether the wallet currently considers the UTXO spendable under wallet policy.
+| <code>spendable</code> || Boolean || Yes || Indicates whether the wallet currently considers the UTXO spendable under wallet policy.
 |}
 
 Wallets MUST return only UTXOs matching the selected <code>assetId</code>, using wallet-unblinded asset IDs for confidential outputs.
@@ -587,25 +587,25 @@ is already authorized by the request context.
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>identity</code> || String || Yes || Identity URI shown to the user.
+| <code>identity</code> || String || Yes || The identity URI shown to the user.
 |-
 | <code>curve</code> || String || Yes || Supported value: <code>nist256p1</code>.
 |-
-| <code>index</code> || Integer || No || Identity-key index. Default is <code>0</code>.
+| <code>index</code> || Integer || No || The identity-key index. Default is <code>0</code>.
 |}
 
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>identity</code> || String || Yes || Identity URI.
+| <code>identity</code> || String || Yes || The identity URI.
 |-
 | <code>curve</code> || String || Yes || MUST be <code>nist256p1</code>.
 |-
-| <code>index</code> || Integer || Yes || Identity-key index.
+| <code>index</code> || Integer || Yes || The identity-key index.
 |-
 | <code>type</code> || String || Yes || MUST be <code>slip-0013</code>.
 |-
-| <code>publicKey</code> || String || Yes || Uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
+| <code>publicKey</code> || String || Yes || The uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
 |}
 
 Example request:
@@ -652,35 +652,35 @@ curve, index, and domain-separation context before approval unless the exact req
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>identity</code> || String || Yes || Identity URI shown to the user.
+| <code>identity</code> || String || Yes || The identity URI shown to the user.
 |-
 | <code>curve</code> || String || Yes || Supported value: <code>nist256p1</code>.
 |-
-| <code>theirPublicKey</code> || String || Yes || Counterparty uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
+| <code>theirPublicKey</code> || String || Yes || The counterparty's uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
 |-
-| <code>index</code> || Integer || No || Identity-key index. Default is <code>0</code>.
+| <code>index</code> || Integer || No || The identity-key index. Default is <code>0</code>.
 |-
 | <code>kdf</code> || String || Yes || Supported value: <code>hkdf-sha256</code>.
 |-
-| <code>kdfSalt</code> || String || Yes || HKDF salt bytes as lowercase hex without <code>0x</code>.
+| <code>kdfSalt</code> || String || Yes || The HKDF salt bytes as lowercase hex without <code>0x</code>.
 |-
-| <code>kdfInfo</code> || String || Yes || HKDF info bytes as lowercase hex without <code>0x</code>. The value MUST domain-separate the intended protocol and MUST commit to the application origin or authenticated caller identity when available, active <code>chain_id</code>, and account identifier.
+| <code>kdfInfo</code> || String || Yes || The HKDF info bytes as lowercase hex without <code>0x</code>. The value MUST domain-separate the intended protocol and MUST commit to the application origin or authenticated caller identity when available, the active <code>chain_id</code>, and the account identifier.
 |}
 
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>identity</code> || String || Yes || Identity URI.
+| <code>identity</code> || String || Yes || The identity URI.
 |-
 | <code>curve</code> || String || Yes || MUST be <code>nist256p1</code>.
 |-
-| <code>index</code> || Integer || Yes || Identity-key index.
+| <code>index</code> || Integer || Yes || The identity-key index.
 |-
 | <code>type</code> || String || Yes || MUST be <code>slip-0017</code>.
 |-
-| <code>publicKey</code> || String || Yes || Wallet identity uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
+| <code>publicKey</code> || String || Yes || The wallet identity's uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
 |-
-| <code>sharedKey</code> || String || Yes || HKDF-SHA256 output as lowercase hex without <code>0x</code>.
+| <code>sharedKey</code> || String || Yes || The HKDF-SHA256 output as lowercase hex without <code>0x</code>.
 |-
 | <code>kdf</code> || String || Yes || Applied KDF: <code>hkdf-sha256</code>.
 |}
@@ -724,38 +724,38 @@ Example result:
 
 ===<code>signIdentity</code>===
 
-This method signs a caller-provided challenge with the deterministic identity-signing key.
+This method is used to sign a caller-provided challenge with the deterministic identity-signing key.
 It follows [https://github.com/satoshilabs/slips/blob/master/slip-0013.md SLIP-0013].
-This method is for identity proof and MUST NOT be displayed or interpreted as transaction approval.
+This method is used for an identity proof and MUST NOT be displayed or interpreted as transaction approval.
 Wallets MUST display the identity string, challenge summary, curve, and index before approval unless the exact
 signing request is already authorized by the request context.
 
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>identity</code> || String || Yes || Identity URI shown to the user.
+| <code>identity</code> || String || Yes || The identity URI shown to the user.
 |-
 | <code>curve</code> || String || Yes || Supported value: <code>nist256p1</code>.
 |-
-| <code>challenge</code> || String || Yes || Challenge bytes as lowercase hex without <code>0x</code>. Bytes length MAY depend on the wallet implementation.
+| <code>challenge</code> || String || Yes || The challenge bytes as lowercase hex without <code>0x</code>. The byte length MAY depend on the wallet implementation.
 |-
-| <code>index</code> || Integer || No || Identity-key index. Default is <code>0</code>.
+| <code>index</code> || Integer || No || The identity-key index. Default is <code>0</code>.
 |}
 
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>identity</code> || String || Yes || Identity URI.
+| <code>identity</code> || String || Yes || The identity URI.
 |-
 | <code>curve</code> || String || Yes || MUST be <code>nist256p1</code>.
 |-
-| <code>index</code> || Integer || Yes || Identity-key index.
+| <code>index</code> || Integer || Yes || The identity-key index.
 |-
 | <code>type</code> || String || Yes || MUST be <code>slip-0013</code>.
 |-
-| <code>publicKey</code> || String || Yes || Uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
+| <code>publicKey</code> || String || Yes || The uncompressed 65-byte public key as 130 lowercase hex characters without <code>0x</code>.
 |-
-| <code>signature</code> || String || Yes || Identity signature as lowercase hex without <code>0x</code>.
+| <code>signature</code> || String || Yes || The identity signature as lowercase hex without <code>0x</code>.
 |}
 
 Example request:
@@ -793,7 +793,7 @@ Example result:
 
 ===<code>signPset</code>===
 
-This method requests signatures for a PSET.
+This method is used to request signatures for a PSET.
 Wallets MUST reject PSETs that cannot be associated with the active Liquid or Elements chain.
 Wallets MUST NOT add unrelated wallet UTXOs to a caller-provided PSET.
 Wallets MUST NOT sign inputs that are not explicitly listed in <code>signInputs</code>.
@@ -801,9 +801,9 @@ Wallets MUST NOT sign inputs that are not explicitly listed in <code>signInputs<
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>pset</code> || String || Yes || Base64-encoded complete PSET serialization.
+| <code>pset</code> || String || Yes || The complete PSET serialization, encoded as base64.
 |-
-| <code>signInputs</code> || Array || Yes || Inputs that the wallet is requested to sign.
+| <code>signInputs</code> || Array || Yes || The inputs that the wallet is requested to sign.
 |-
 | <code>broadcast</code> || Boolean || No || If <code>true</code>, the wallet MAY finalize and broadcast the transaction after signing. Default is <code>false</code>.
 |}
@@ -818,11 +818,11 @@ Each <code>signInputs</code> entry has the following fields:
 {| class="wikitable"
 ! Field !! Type !! Required !! Description
 |-
-| <code>index</code> || Integer || Yes || Input index in the PSET.
+| <code>index</code> || Integer || Yes || The input index in the PSET.
 |-
 | <code>address</code> || String || Yes || Liquid confidential or unconfidential address whose script identifies the spend key for this input. If a confidential address is supplied, the wallet MUST use only its script address component for spend-key selection.
 |-
-| <code>sighashTypes</code> || Integer[] || No || Allowed signature hash modes for this input. Each value MUST be a fully encoded standard Elements ECDSA sighash integer from the table below. Default is <code>[1]</code>.
+| <code>sighashTypes</code> || Integer[] || No || The allowed signature hash modes for this input. Each value MUST be a fully encoded standard Elements ECDSA sighash integer from the table below. Default is <code>[1]</code>.
 |}
 
 The signature hash mode applies to a single PSET input.
@@ -856,9 +856,9 @@ Wallets MUST reject bare <code>128</code> in <code>sighashTypes</code>.
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>pset</code> || String || Yes || Base64-encoded signed PSET.
+| <code>pset</code> || String || Yes || The signed PSET, encoded as base64.
 |-
-| <code>txid</code> || String || Conditional || Transaction ID as 64 lowercase hex characters. This field MUST be returned if the transaction was broadcast.
+| <code>txid</code> || String || Conditional || The transaction ID as 64 lowercase hex characters. This field MUST be returned if the transaction was broadcast.
 |}
 
 Wallets MUST verify that each listed <code>address</code> corresponds to the input's previous-output script or
@@ -914,12 +914,12 @@ Example result:
 
 ===<code>signMessage</code>===
 
-This method signs a message with the spend key for a connected Liquid address. Message signing uses spend keys, not descriptor blinding keys or view keys.
+This method is used to sign a message with the spend key for a connected Liquid address. Message signing uses spend keys, not descriptor blinding keys or view keys.
 
 {| class="wikitable"
 ! Parameter !! Type !! Required !! Description
 |-
-| <code>message</code> || String || Yes || UTF-8 message shown to the user.
+| <code>message</code> || String || Yes || The UTF-8 message shown to the user.
 |-
 | <code>address</code> || String || Yes || Liquid confidential or unconfidential address whose spend key signs the message. If a confidential address is supplied, the wallet MUST use only its script address component for spend-key selection.
 |-
@@ -929,15 +929,15 @@ This method signs a message with the spend key for a connected Liquid address. M
 {| class="wikitable"
 ! Result field !! Type !! Required !! Description
 |-
-| <code>address</code> || String || Yes || Liquid address used for signing.
+| <code>address</code> || String || Yes || The Liquid address used for signing.
 |-
-| <code>signature</code> || String || Yes || Encoded signature.
+| <code>signature</code> || String || Yes || The encoded signature.
 |-
 | <code>signatureEncoding</code> || String || Yes || <code>hex-recoverable-ecdsa-65</code> when <code>protocol</code> is <code>ecdsa</code>; <code>bip322</code> when <code>protocol</code> is <code>bip322</code>.
 |-
-| <code>protocol</code> || String || Yes || Applied protocol: <code>ecdsa</code> or <code>bip322</code>.
+| <code>protocol</code> || String || Yes || The applied protocol: <code>ecdsa</code> or <code>bip322</code>.
 |-
-| <code>messageHash</code> || String || Conditional || Required when <code>protocol</code> is <code>ecdsa</code>. 32-byte legacy message digest as lowercase hex without <code>0x</code>.
+| <code>messageHash</code> || String || Conditional || Required when <code>protocol</code> is <code>ecdsa</code>. The 32-byte legacy message digest as lowercase hex without <code>0x</code>.
 |}
 
 For <code>protocol = ecdsa</code>, the wallet MUST compute <code>messageHash</code> as:
@@ -986,13 +986,13 @@ Example result:
 
 ===<code>processConfidentialTransaction</code>===
 
-This method is optional. It delegates request and response shape to the Wallet ABI transaction creation protocol.
+This method is optional. It delegates the request and response shapes to the Wallet ABI transaction creation protocol.
 
 Wallets that support this method MUST implement it as described by the
 [https://github.com/KyrylR/ELIPs/blob/c946695f75f98477008bad0059d2894696bbaadd/elip-wallet-abi.mediawiki Wallet ABI Transaction Creation Protocol].
 The JSON-RPC request MUST carry the Wallet ABI transaction request object.
 The JSON-RPC result MUST carry the Wallet ABI transaction response object.
-Wallets MUST reject requests whose Wallet ABI version, account scope, chain ID, approval requirements are not supported or authorized.
+Wallets MUST reject requests whose Wallet ABI version, account scope, chain ID, or approval requirements are not supported or authorized.
 
 <!-- TODO: The Wallet ABI reference above is provisional; before this ELIP is finalized, replace it with a canonical Wallet ABI ELIP or upstream repository reference. -->
 
@@ -1000,7 +1000,7 @@ Wallets MUST reject requests whose Wallet ABI version, account scope, chain ID, 
 
 ===<code>bip122_walletDescriptorChanged</code>===
 
-This event notifies dapps that descriptor metadata for the connected Liquid account changed.
+This event is used by wallets to notify dapps that descriptor metadata for the connected Liquid account changed.
 The event data has the same shape as the <code>getWalletDescriptor</code> result.
 
 Wallets SHOULD emit this event when the descriptor set for the connected account changes,
@@ -1101,49 +1101,3 @@ result shape, and artifact redaction rules to that protocol.
 ==Reference Implementation==
 
 TBD.
-
-==Test Vectors==
-
-The following values were derived and statically validated with [https://docs.rs/lwk_bindings/latest/lwk/ Liquid Wallet Kit].
-
-<pre>
-public_wallet_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/<0;1>/*)#csxkmyvv
-dwid                     = b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
-account_identifier       = bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
-address_index_0          = ex1qyuh42lps6t6jpdk54cwmmhd27zrs3yulrc7t5a
-policy_asset_id          = bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d
-</pre>
-
-Split branch descriptors for the same public wallet descriptor are:
-
-<pre>
-external_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/0/*)#w7nj838h
-internal_descriptor = elwpkh([73c5da0a/84'/1776'/0']xpub6CRFzUgHFDaiDAQFNX7VeV9JNPDRabq6NYSpzVZ8zW8ANUCiDdenkb1gBoEZuXNZb3wPc1SVcDXgD2ww5UBtTb8s8ArAbTkoRQ8qn34KgcY/1/*)#l2kn6yh0
-</pre>
-
-
-The following identity and signing vectors use the same mnemonic. The identity keys are derived with [https://github.com/satoshilabs/slips/blob/master/slip-0010.md SLIP-0010] over NIST P-256 and the [https://github.com/satoshilabs/slips/blob/master/slip-0013.md SLIP-0013] or [https://github.com/satoshilabs/slips/blob/master/slip-0017.md SLIP-0017] identity path for <code>ssh://jade@blockstream.com</code> at index <code>0</code>.
-
-<pre>
-slip0013_public_key = 04012c4f72037ddf467581dd8081bd365b668c9e00fdec2a9c9ff7f4a23df3ff747cd1fb99256b631c6316d1f1b692df829d3c6a687d327d3a3942822499a2abc1
-slip0013_challenge  = 4c69717569642057616c6c6574205250432050726f66696c65206964656e74697479206368616c6c656e6765
-slip0013_signature  = 00c3fec3b39151ec274f7fb821e6b019c02625e2bfea74fca6635b19d28bef9de53fd7937ca7b10e6be7e228ae96923a45dd4add2aa94920fe660b522b6a9bf6c2
-slip0017_public_key = 045b2d18e9ce5c62c6dff146c3453e672ea83606b9841e32fa6793115f23589c696aba3c36c1b08eae7a3c8b9d81878ccddf84adce4d72811867de60922f70fa1a
-peer_public_key     = 04c95ff5052c66d17ecbf08eafe00aade2071830b0bafc8e87b3debffbfa1b733272900303e6688e025f9744e6c6e6961c5861138cc4e909eeedd84c84311b5ca1
-raw_shared_key      = c78d6f0cde624fdbadb88c7d6af291530ee0a203938c7d88b6a2c5ab4d85d3c8
-hkdf_salt           = 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
-hkdf_info           = 4c69717569642057616c6c6574205250432050726f66696c65206964656e7469747920736861726564206b6579207631
-hkdf_shared_key     = b5adc5d2a7d19baff144e765eb448fbf1decc7e6bc6b309d8ed0f7a202d1561e
-message_hash        = 95b7987475f7157b80aa3c5087d910e44429f410cd3b12c25a652e9c2d480d89
-message_signature   = ded4c5a767265f1df01b5453da8df9d364d81775d780c8f52707573a68c485152f59a354eec5c935072eff8e6d14d3c6744659fc405cad88e395afd9493cdd3a00
-</pre>
-
-The following PSET values are constructed from an explicit policy-asset UTXO at the example script and were parsed with [https://docs.rs/lwk_bindings/latest/lwk/ Liquid Wallet Kit]. The signed PSET was produced with the Liquid Wallet Kit signer for the same mnemonic.
-
-<pre>
-example_utxo_txid = 4b33bd9a251311bd7f247ea19b3cf9887977ba4d9abe2ec7886de24094252586
-example_utxo_vout = 0
-example_utxo_txout = 016d521c38ec1ea15734ae22b7c46064412829c0d0579f0a713d1c04ede979026f01000000000001e24000160014272f557c30d2f520b6d4ae1dbdddaaf08708939f
-example_pset_unique_id = b32487878e61f1765058bc566c6f51bb851df3710323c464988202758f25d32c
-example_pset_partial_signature = 304402201ea482f48f8be85a5a11be08c380c9ec65fed1795fc56f77278954e7969700dd0220562511b2f4f46f082362d19707819b85813c085377ddec91fa84e1e83f95081c01
-</pre>
