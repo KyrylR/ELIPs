@@ -1,0 +1,621 @@
+<pre>
+ELIP: TBD
+Layer: Wallet
+Title: Clear Signing for Liquid
+Author: TBD
+Comments-Summary: No comments yet.
+Comments-URI: TBD
+Status: Draft
+Type: Standards Track
+Created: 2026-06-09
+License: BSD-3-Clause
+</pre>
+
+==Abstract==
+
+This document defines a structured metadata profile for wallets to interpret an Elements transaction for the user. It helps users understand the consequences of signing a particular transaction and lowers the risk of blind signing as much as possible.
+
+It does not specify how this metadata is verified or made trusted.
+
+==Copyright==
+
+This document is licensed under the 3-clause BSD license.
+
+==Motivation==
+
+To expand the Liquid ecosystem, infrastructure and user-facing applications should be able to explain to a non-technical user what is happening and which outcomes to expect. Similar to banking systems, users should be given as much security as possible by default. Therefore, ecosystem participants should make as much effort as possible in explaining actions to the user.
+
+This profile presents a way to interpret a general-purpose action of signing a transaction on the Liquid network to the user.
+
+==Specification==
+
+The keywords "MUST", "MUST NOT", "REQUIRED", "SHOULD", "SHOULD NOT", and "MAY" in this document are to be interpreted as described in [https://www.rfc-editor.org/rfc/rfc2119 RFC 2119].
+
+==Scope==
+
+This document is scoped to regular Liquid transfers, asset issuance, asset burn, multisig signing flows that a wallet can identify with sufficient confidence, and Simplicity covenant spends.
+
+Non-Simplicity Taproot script-path spends are out of scope. Bitcoin Script and Miniscript covenant interpretation outside the regular cases above is out of scope. A separate library, BIP, or ELIP should define clear signing for non-Simplicity Taproot and general Bitcoin Script covenant interpretation.
+
+This document does not specify the final shape of wallet views. It specifies what information should be available to the wallet and what information should be included in the metadata documents used for clear signing.
+
+==General==
+
+This document defines a clear-signing request.
+
+A clear-signing request is the request or proposal displayed to the user for review. This request MUST be presented from the simplest form to a deep technical level.
+
+A wallet SHOULD make the best effort to inform the user about the action being executed and its consequences.
+
+The ideal example to follow is:
+
+Transfer request:
+
+<pre>
+You send Alice 10.25 USDT
+</pre>
+
+where:
+
+
+# <code>Alice</code> is an alias for the receiver account.
+# <code>10.25</code> is the amount with decimals.
+# <code>USDT</code> is an alias for the token being spent.
+
+Multisig request, initiating the multisig transfer:
+
+<pre>
+Initiating a send of Yours and Bob's 10.25 USDT to Alice
+</pre>
+
+where:
+
+
+# <code>Initiating a send</code> is the action being performed.
+# <code>Yours and Bob's</code> are the parties involved in multisig.
+# <code>10.25</code>, <code>USDT</code>, and <code>Alice</code> have the same definitions as in the transfer request.
+
+Multisig request, finalizing the multisig transfer:
+
+<pre>
+Finalizing a send of Yours and Bob's 10.25 USDT to Alice
+</pre>
+
+where all definitions are the same as in the multisig request example, and the only difference is the action being performed.
+
+Taproot spend, Simplicity, lending a settlement asset to the borrower:
+
+<pre>
+Lending 1500.00 USDT to <account>, receiving a Lending liquidation token
+<account> is bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799
+Lending liquidation token gives an opportunity to liquidate in case of borrower offer expiry.
+</pre>
+
+This information is the first information shown to the user.
+
+The wallet MUST allow entering a detailed view for:
+
+
+# Accounts and their aliases, later referred to as <code>account</code>.
+# The action being performed.
+# Asset ID and its metadata, later referred to as the <code>asset metadata document</code>.
+# Amounts.
+# Simplicity covenant spend information, later referred to as the <code>covenant metadata document</code>.
+
+Every detailed view is meant to inform the user about the exact final transaction shape.
+
+==Account and Chain Binding==
+
+Every clear-signing request MUST be bound to the active Liquid or Elements chain.
+
+<pre>
+chain_id = "bip122:" + first_32_lowercase_hex_characters_of_genesis_block_hash
+</pre>
+
+Liquid mainnet uses:
+
+<pre>
+bip122:1466275836220db2944ca059a3a10ef6
+</pre>
+
+Liquid testnet uses:
+
+<pre>
+bip122:a771da8e52ee6ad581ed1e9a99825e5b
+</pre>
+
+Liquid asset identifiers MUST use the [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID form:
+
+<pre>
+asset_id = chain_id + "/" + asset_namespace + ":" + asset_reference
+asset_namespace = "elip144"
+asset_reference = 64 lowercase hex characters
+</pre>
+
+The Liquid mainnet policy asset ID is:
+
+<pre>
+bip122:1466275836220db2944ca059a3a10ef6/elip144:6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d
+</pre>
+
+A wallet MUST validate that every <code>chainId</code>, <code>account</code>, asset metadata document, covenant metadata document, and asset ID refers to the active chain.
+
+==Metadata Document Model==
+
+Each imported metadata object is a standalone document. A user imports an account metadata document, an asset metadata document, an action metadata document, or a covenant metadata document.
+
+A clear-signing request MAY reference standalone documents by hash, by local identifier, by registry identifier, or by embedding the document directly. This document does not specify the transport mechanism for metadata documents.
+
+Each metadata document MUST contain:
+
+{|
+! Field
+! Type
+! Required
+! Description
+|-
+| <code>$schema</code>
+| String
+| Yes
+| The JSON Schema URI for this document type.
+|-
+| <code>kind</code>
+| String
+| Yes
+| The metadata document kind.
+|-
+| <code>version</code>
+| Integer
+| Yes
+| The version of the document kind.
+|-
+| <code>context</code>
+| Object
+| Yes
+| The constraints that MUST match before the document is used.
+|-
+| <code>metadata</code>
+| Object
+| Yes
+| Trusted constants values that are usable after context matching.
+|-
+| <code>display</code>
+| Object
+| Yes
+| User-facing labels, intent strings, detail labels, and formatting rules.
+|}
+
+A wallet MUST verify the <code>context</code> before applying <code>metadata</code> or <code>display</code>.
+
+A wallet MUST NOT use metadata as the source of truth for the final transaction shape. A wallet MUST compute final transaction shape from the transaction, PSET, wallet state, and wallet policy.
+
+A metadata document MAY contain a <code>documentId</code> field. If present, <code>documentId</code> MUST be a hash of the canonical document bytes or a registry identifier bound to that hash.
+
+==Clear-Signing Review Layers==
+
+A wallet SHOULD review a clear-signing request in layers:
+
+
+# Summary layer.
+# Net balance layer.
+# Account details layer.
+# Asset details layer.
+# Action details layer.
+# Amount details layer.
+# Simplicity covenant details layer.
+# Raw fallback layer.
+
+The summary layer SHOULD be short and user-facing.
+
+The net balance layer MUST be wallet-computed and grouped per asset.
+
+The account details layer MUST show the full account identifier based on [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144].
+
+The asset details layer MUST show the full asset ID.
+
+The action details layer MUST show the action being performed and the source of the action match.
+
+The amount details layer MUST show the base-unit amount and the formatted display amount when asset precision is available.
+
+The Simplicity covenant details layer MUST show the covenant metadata document and the matched action.
+
+The raw fallback layer SHOULD show the raw account, asset, action, and covenant binding values when the wallet cannot safely shorten or explain them.
+
+==Account Metadata Document==
+
+An account metadata document binds an [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] account ID to a user-facing alias.
+
+The detailed account view MUST show the full account ID. The detailed account view MUST NOT shorten the account ID itself.
+
+If possible, a wallet SHOULD use an alias. If there is no alias, the wallet SHOULD make its best effort to point the user to the full account form so the user can verify it.
+
+A wallet MAY abbreviate an account in the summary layer only if the full account ID is available in the detailed view.
+
+===Account Metadata Fields===
+
+{|
+! Field
+! Type
+! Required
+! Description
+|-
+| <code>kind</code>
+| String
+| Yes
+| MUST be <code>liquid.accountMetadata</code>.
+|-
+| <code>context.chainId</code>
+| String
+| Yes
+| The active Liquid or Elements chain ID.
+|-
+| <code>context.account</code>
+| String
+| Yes
+| The full account ID.
+|-
+| <code>metadata.alias</code>
+| String
+| No
+| The account alias.
+|-
+| <code>metadata.description</code>
+| String
+| No
+| A human-readable description of the account.
+|-
+| <code>metadata.owner</code>
+| String
+| No
+| A human-readable owner label.
+|-
+| <code>metadata.infoUrl</code>
+| String
+| No
+| A URL with more information.
+|-
+| <code>display.summaryLabel</code>
+| String
+| No
+| A short label for summary views.
+|-
+| <code>display.detailFields</code>
+| Array
+| No
+| A list of detailed fields to display.
+|}
+
+===Account Metadata Example===
+
+<pre>
+{
+  "$schema": "https://example.invalid/liquid-clear-signing/account-metadata-v0.schema.json",
+  "kind": "liquid.accountMetadata",
+  "version": 0,
+  "context": {
+    "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
+    "account": "bip122:1466275836220db2944ca059a3a10ef6:b781-7bc7-db64-c3de-3937-7eb7-c9ab-f799"
+  },
+  "metadata": {
+    "alias": "Alice",
+    "description": "Receiver account"
+  },
+  "display": {
+    "summaryLabel": "Alice",
+    "detailFields": [
+      { "label": "Account", "path": "$.context.account" },
+      { "label": "Alias", "path": "$.metadata.alias" }
+    ]
+  }
+}
+</pre>
+
+==Asset Metadata Document==
+
+An asset metadata document binds an [https://github.com/ElementsProject/ELIPs/blob/main/elip-0144.mediawiki ELIP-0144] asset ID to asset metadata.
+
+The detailed asset view MUST show the full asset ID. If an asset alias, ticker, or name is unavailable, the wallet MUST fall back to displaying the full asset ID.
+
+The wallet MUST validate that the asset metadata document refers to the active chain.
+
+The asset metadata document SHOULD be compatible with the existing Liquid asset contract shape used by the Liquid asset registry and [https://github.com/ElementsProject/ELIPs/blob/main/elip-0100.mediawiki ELIP-0100], including <code>entity.domain</code>, <code>issuer_pubkey</code>, <code>name</code>, <code>precision</code>, <code>ticker</code>, and <code>version</code> when those fields are available.
+
+===Asset Metadata Fields===
+
+{|
+! Field
+! Type
+! Required
+! Description
+|-
+| <code>kind</code>
+| String
+| Yes
+| MUST be <code>liquid.assetMetadata</code>.
+|-
+| <code>context.chainId</code>
+| String
+| Yes
+| The active Liquid or Elements chain ID.
+|-
+| <code>context.assetId</code>
+| String
+| Yes
+| The full ELIP-0144 asset ID.
+|-
+| <code>metadata.name</code>
+| String
+| No
+| The asset display name.
+|-
+| <code>metadata.ticker</code>
+| String
+| No
+| The ticker shown in the summary layer.
+|-
+| <code>metadata.precision</code>
+| Integer
+| No
+| The decimal precision used to format base-unit amounts.
+|-
+| <code>metadata.entity.domain</code>
+| String
+| No
+| The issuer or entity domain.
+|-
+| <code>metadata.issuer_pubkey</code>
+| String
+| No
+| The issuer public key from the asset contract.
+|-
+| <code>metadata.version</code>
+| Integer
+| No
+| The asset contract version.
+|-
+| <code>display.summaryLabel</code>
+| String
+| No
+| A short label for summary views.
+|-
+| <code>display.detailFields</code>
+| Array
+| No
+| A list of detailed fields to display.
+|}
+
+===Asset Amount Formatting===
+
+Amounts MUST be computed in base units first.
+
+If <code>metadata.precision</code> is available and valid, the wallet MAY display the amount as a decimal value. If precision is unavailable, the wallet MUST display the base-unit amount and SHOULD show that decimal precision is unavailable.
+
+Asset metadata MUST NOT override the asset ID of a transaction input or output.
+
+===Asset Metadata Example===
+
+<pre>
+{
+  "$schema": "https://example.invalid/liquid-clear-signing/asset-metadata-v0.schema.json",
+  "kind": "liquid.assetMetadata",
+  "version": 0,
+  "context": {
+    "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
+    "assetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:ce091c998b83c78bb71a632313ba3760f1763d9cfcffae02258ffa9865a37bd2"
+  },
+  "metadata": {
+    "entity": {
+      "domain": "tether.to"
+    },
+    "name": "Tether USDt",
+    "precision": 8,
+    "ticker": "USDT",
+    "version": 0
+  },
+  "display": {
+    "summaryLabel": "USDT",
+    "detailFields": [
+      { "label": "Asset ID", "path": "$.context.assetId" },
+      { "label": "Ticker", "path": "$.metadata.ticker" },
+      { "label": "Name", "path": "$.metadata.name" },
+      { "label": "Precision", "path": "$.metadata.precision" }
+    ]
+  }
+}
+</pre>
+
+==Amounts and Net Balance Changes==
+
+A wallet MUST compute net balance changes per asset.
+
+A wallet MUST compute the amount lost by the wallet, the amount gained by the wallet, and the amount that stays in the wallet as change, per asset, when the required transaction data and wallet state are available.
+
+A wallet MUST show fees as part of the net balance review for the fee asset.
+
+A wallet MUST NOT use a metadata document as the source of truth for amount or asset movement.
+
+A wallet MUST reject or clearly downgrade the review if it cannot compute a safe review of wallet inputs, wallet outputs, fees, and confidentiality status.
+
+===Net Balance Change Fields===
+
+A clear-signing request review SHOULD expose the following wallet-computed structure to the display layer:
+
+{|
+! Field
+! Type
+! Required
+! Description
+|-
+| <code>assetId</code>
+| String
+| Yes
+| The ELIP-0144 asset ID.
+|-
+| <code>inputAmount</code>
+| String
+| Yes
+| Wallet-owned input amount in base units.
+|-
+| <code>outputAmount</code>
+| String
+| Yes
+| Wallet-owned output amount in base units.
+|-
+| <code>changeAmount</code>
+| String
+| No
+| Wallet-owned change amount in base units when the wallet can identify change.
+|-
+| <code>externalReceiveAmount</code>
+| String
+| No
+| Amount received by external accounts when known.
+|-
+| <code>feeAmount</code>
+| String
+| No
+| Fee amount for this asset when this asset pays fees.
+|-
+| <code>netAmount</code>
+| String
+| Yes
+| <code>outputAmount - inputAmount</code>, in base units, from the wallet perspective.
+|-
+| <code>direction</code>
+| String
+| Yes
+| <code>loss</code>, <code>gain</code>, or <code>neutral</code>.
+|-
+| <code>confidence</code>
+| String
+| Yes
+| <code>verified</code>, <code>partial</code>, or <code>unknown</code>.
+|}
+
+===Net Balance Change Example===
+
+<pre>
+{
+  "assetId": "bip122:1466275836220db2944ca059a3a10ef6/elip144:ce091c998b83c78bb71a632313ba3760f1763d9cfcffae02258ffa9865a37bd2",
+  "inputAmount": "1025000000",
+  "outputAmount": "0",
+  "externalReceiveAmount": "1025000000",
+  "netAmount": "-1025000000",
+  "direction": "loss",
+  "confidence": "verified"
+}
+</pre>
+
+==Action Metadata Document==
+
+An action metadata document describes the action being performed.
+
+In cases like issuance, burn, transfer, and multisig, the action can be a special case recognized by the wallet.
+
+In some cases, a wallet MAY rely on Bitcoin Script or transaction pattern matching to understand what is happening. In some cases, this cannot be possible because of the complexity of multisig schemes and because some schemes are indistinguishable from each other from the pure transaction point of view.
+
+An action metadata document MUST NOT override wallet-computed transaction shape.
+
+===Built-In Regular Actions===
+
+This profile recognizes the following regular actions:
+
+{|
+! Action
+! Description
+|-
+| <code>transfer</code>
+| A transfer of an existing asset.
+|-
+| <code>issuance</code>
+| A issuance of a new Liquid asset.
+|-
+| <code>re-issuance</code>
+| A re-issuance of a Liquid asset.
+|-
+| <code>burn</code>
+| A burn of an existing Liquid asset.
+|-
+| <code>unknown</code>
+| A non-Simplicity action that the wallet cannot classify.
+|}
+
+===Action Metadata Fields===
+
+{|
+! Field
+! Type
+! Required
+! Description
+|-
+| <code>kind</code>
+| String
+| Yes
+| MUST be <code>liquid.actionMetadata</code>.
+|-
+| <code>context.chainId</code>
+| String
+| Yes
+| The active Liquid or Elements chain ID.
+|-
+| <code>context.actionType</code>
+| String
+| Yes
+| A built-in regular action identifier.
+|-
+| <code>metadata.name</code>
+| String
+| No
+| The action display name.
+|-
+| <code>metadata.description</code>
+| String
+| No
+| The action description.
+|-
+| <code>display.intent</code>
+| String
+| Yes
+| A short action intent.
+|-
+| <code>display.interpolatedIntent</code>
+| String
+| No
+| A short summary template.
+|-
+| <code>display.fields</code>
+| Array
+| No
+| Display fields required for the action.
+|}
+
+===Action Metadata Example===
+
+<pre>
+{
+  "$schema": "https://example.invalid/liquid-clear-signing/action-metadata-v0.schema.json",
+  "kind": "liquid.actionMetadata",
+  "version": 0,
+  "context": {
+    "chainId": "bip122:1466275836220db2944ca059a3a10ef6",
+    "actionType": "transfer"
+  },
+  "metadata": {
+    "name": "Transfer",
+    "description": "A regular transfer of a Liquid asset."
+  },
+  "display": {
+    "intent": "Send",
+    "interpolatedIntent": "You send {to} {amount} {asset}",
+    "fields": [
+      { "path": "to", "label": "To", "format": "account" },
+      { "path": "amount", "label": "Amount", "format": "assetAmount" },
+      { "path": "asset", "label": "Asset", "format": "asset" }
+    ]
+  }
+}
+</pre>
+
+==Simplicity Covenant Metadata Document==
+
+TBD
