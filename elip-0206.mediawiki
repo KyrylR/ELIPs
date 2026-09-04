@@ -1,0 +1,42 @@
+<pre>
+  ELIP: 206
+  Layer: Wallet
+  Title: Clear Signing for Liquid Wallets
+  Author: Kyrylo Riabov <kriabov@blockstream.com>
+          Artem Chystiakov <achystiakov@blockstream.com>
+  Comments-Summary: No comments yet.
+  Comments-URI: https://github.com/ElementsProject/ELIPs/pull/40
+  Status: Draft
+  Type: Standards Track
+  Created: 2026-06-09
+  License: BSD-3-Clause
+</pre>
+
+==Introduction==
+
+===Abstract===
+
+This document defines a structured metadata profile for wallets to interpret an Elements transaction for the user.
+It helps users understand the consequences of signing a particular transaction and lowers the risk of blind signing
+as much as possible.
+
+It does not specify how this metadata is verified or made trusted.
+
+===Copyright===
+
+This document is licensed under the 3-clause BSD license.
+
+===Motivation===
+
+To expand the Liquid ecosystem, infrastructure and user-facing applications should be able to explain
+to a non-technical user what is happening and which outcomes to expect. Similar to banking systems,
+users should be given as much security as possible by default.
+
+Therefore, ecosystem participants should make as much effort as possible in explaining actions to the user.
+
+This ELIP gathers available resources on existing methods to attach and read metadata related to transaction.
+As well as, presents a way to interpret a general-purpose action of signing a transaction on the Liquid network to the user.
+
+==Specification==
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [https://www.rfc-editor.org/rfc/rfc2119 RFC 2119] and [https://www.rfc-editor.org/rfc/rfc8174 RFC 8174] when, and only when, they appear in all capitals.
