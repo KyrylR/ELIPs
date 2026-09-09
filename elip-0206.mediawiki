@@ -16,11 +16,11 @@
 
 ===Abstract===
 
-This document defines a structured metadata profile for wallets to interpret an Elements transaction for the user.
-It helps users understand the consequences of signing a particular transaction and lowers the risk of blind signing
-as much as possible.
+This proposal gathers available resources on existing methods to attach and read metadata related to transaction.
+As well as, presents a way to interpret a general-purpose action of signing a transaction on the Liquid network to the user.
 
-It does not specify how this metadata is verified or made trusted.
+It helps users understand the consequences of signing a particular transaction and lowers the risk of blind signing
+as much as possible within provided trust assumptions.
 
 ===Copyright===
 
@@ -33,9 +33,6 @@ to a non-technical user what is happening and which outcomes to expect. Similar 
 users should be given as much security as possible by default.
 
 Therefore, ecosystem participants should make as much effort as possible in explaining actions to the user.
-
-This ELIP gathers available resources on existing methods to attach and read metadata related to transaction.
-As well as, presents a way to interpret a general-purpose action of signing a transaction on the Liquid network to the user.
 
 ==Specification==
 
